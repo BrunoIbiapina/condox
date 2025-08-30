@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Porteiro • CondoX{% endblock %}
+{% block content %}
+
+<header class="mb-6">
+  <div class="flex items-center justify-between gap-3">
+    <h1 class="text-2xl font-semibold tracking-tight flex items-center gap-2">
+      <i data-lucide="badge-check" class="w-6 h-6"></i>
+      Painel do Porteiro
+    </h1>
+    <span class="text-sm text-gray-500">Agora: {{ agora|date:"d/m/Y H:i" }}</span>
+  </div>
+  <p class="text-gray-500 text-sm mt-2">Agenda do dia por horário e área.</p>
+</header>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+  <!-- Agenda do dia (2/3) -->
+  <section class="lg:col-span-2 card p-5">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-semibold text-lg flex items-center gap-2">
+        <i data-lucide="calendar-days" class="w-5 h-5"></i>
+        Reservas de hoje
+      </h2>
+    </div>
+
+    <ul class="divide-y divide-gray-200">
+      {% for r in reservas_hoje %}
+        <li class="py-3 flex items-center justify-between">
+          <div class="min-w-0">
+            <div class="font-medium truncate">{{ r.area.nome }}</div>
+            <div class="text-gray-600 text-sm mt-0.5">
+              {{ r.inicio|date:"H:i" }} – {{ r.fim|date:"H:i" }} • {{ r.morador.get_full_name|default:r.morador.username }}
+            </div>
+          </div>
+
+          <span class="pill
+            {% if r.inicio <= agora and r.fim > agora %}
+              bg-green-100 text-green-700
+            {% elif r.status == 'APROVADA' %}
+              bg-blue-100 text-blue-700
+            {% elif r.status == 'PENDENTE' %}
+              bg-amber-100 text-amber-700
+            {% else %}
+              bg-gray-100 text-gray-700
+            {% endif %}">
+            {% if r.inicio <= agora and r.fim > agora %}EM USO{% else %}{{ r.get_status_display }}{% endif %}
+          </span>
+        </li>
+      {% empty %}
+        <li class="py-8 text-sm text-gray-500 text-center">Sem reservas para hoje.</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <!-- Acesso rápido (1/3) -->
+  <aside class="space-y-5">
+    <a href="/reservas/areas/" class="card p-5 hover:bg-gray-50 transition flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <i data-lucide="calendar-search" class="w-6 h-6 text-blue-600"></i>
+        <div>
+          <div class="font-semibold">Consultar disponibilidade</div>
+          <div class="text-xs text-gray-500">Ver áreas e horários</div>
+        </div>
+      </div>
+      <i data-lucide="arrow-right" class="w-4 h-4 text-gray-400"></i>
+    </a>
+
+    <a href="/admin/reservas/reserva/" class="card p-5 hover:bg-gray-50 transition flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <i data-lucide="notebook-pen" class="w-6 h-6 text-emerald-600"></i>
+        <div>
+          <div class="font-semibold">Gerenciar reservas</div>
+          <div class="text-xs text-gray-500">Criar/editar/cancelar</div>
+        </div>
+      </div>
+      <i data-lucide="arrow-right" class="w-4 h-4 text-gray-400"></i>
+    </a>
+  </aside>
+</div>
+
+{% endblock %}

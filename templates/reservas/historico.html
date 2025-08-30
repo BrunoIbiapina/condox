@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Histórico de Reservas{% endblock %}
+{% block content %}
+
+<header class="mb-6">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-semibold tracking-tight flex items-center gap-2">
+      <i data-lucide="history" class="w-6 h-6"></i>
+      Histórico de Reservas
+    </h1>
+    <a href="/" class="btn btn-secondary">
+      <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar
+    </a>
+  </div>
+  <p class="text-gray-500 text-sm mt-2">
+    Filtre por período para ver suas reservas passadas (e recentes).
+  </p>
+</header>
+
+<!-- Filtro por período -->
+<form method="get" class="card p-4 mb-5">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+    <div>
+      <label class="text-sm text-gray-600 block mb-1">De</label>
+      <input type="date" name="de" value="{{ de }}" class="bg-white border border-gray-300 rounded px-3 py-2 w-full">
+    </div>
+    <div>
+      <label class="text-sm text-gray-600 block mb-1">Até</label>
+      <input type="date" name="ate" value="{{ ate }}" class="bg-white border border-gray-300 rounded px-3 py-2 w-full">
+    </div>
+    <div class="flex gap-2">
+      <button class="btn btn-secondary">
+        <i data-lucide="search" class="w-4 h-4"></i> Filtrar
+      </button>
+      <a href="{% url 'reservas:historico' %}" class="btn btn-ghost">Limpar</a>
+    </div>
+  </div>
+</form>
+
+<!-- Tabela -->
+<section class="card p-5">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="font-semibold text-lg flex items-center gap-2">
+      <i data-lucide="calendar-range" class="w-5 h-5"></i>
+      Registros encontrados
+    </h2>
+    <span class="text-sm text-gray-500">{{ reservas|length }} item(ns)</span>
+  </div>
+
+  {% if reservas %}
+  <div class="overflow-x-auto">
+    <table class="min-w-full">
+      <thead>
+        <tr>
+          <th>Área</th>
+          <th>Início</th>
+          <th>Fim</th>
+          <th>Status</th>
+          <th>Compart.</th>
+          <th>Observações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in reservas %}
+          <tr>
+            <td class="whitespace-nowrap">{{ r.area.nome }}</td>
+            <td class="whitespace-nowrap">{{ r.inicio|date:"d/m/Y H:i" }}</td>
+            <td class="whitespace-nowrap">{{ r.fim|date:"d/m/Y H:i" }}</td>
+            <td class="whitespace-nowrap">
+              <span class="pill
+                {% if r.status == 'APROVADA' %} bg-blue-100 text-blue-700
+                {% elif r.status == 'PENDENTE' %} bg-amber-100 text-amber-700
+                {% elif r.status == 'CANCELADA' %} bg-gray-100 text-gray-700
+                {% else %} bg-gray-100 text-gray-700 {% endif %}">
+                {{ r.get_status_display }}
+              </span>
+            </td>
+            <td class="whitespace-nowrap">
+              {% if r.permite_compartilhar %}
+                <span class="pill bg-sky-100 text-sky-700">Sim</span>
+              {% else %}
+                <span class="pill bg-gray-100 text-gray-700">Não</span>
+              {% endif %}
+            </td>
+            <td class="max-w-[320px]">
+              <span class="text-gray-700">{{ r.observacoes|default:"—" }}</span>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="text-sm text-gray-600">Sem reservas neste período.</div>
+  {% endif %}
+</section>
+
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Histórico de Reservas • CondoX{% endblock %}
+{% block content %}
+
+<header class="mb-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <h1 class="text-2xl font-semibold tracking-tight flex items-center gap-2">
+      <i data-lucide="history" class="w-6 h-6"></i>
+      Histórico de Reservas
+    </h1>
+    <a href="/" class="btn"><i data-lucide="home" class="w-4 h-4"></i> Voltar ao painel</a>
+  </div>
+  <p class="opacity-75 text-sm mt-2">Filtre por intervalo de datas para consultar suas reservas passadas.</p>
+</header>
+
+<form method="get" class="card p-4 mb-5">
+  <div class="grid sm:grid-cols-4 gap-3 items-end">
+    <div>
+      <label class="block text-sm opacity-80 mb-1">De</label>
+      <input type="date" name="de" value="{{ de }}" class="w-full bg-slate-900 border border-slate-800 rounded px-3 py-2">
+    </div>
+    <div>
+      <label class="block text-sm opacity-80 mb-1">Até</label>
+      <input type="date" name="ate" value="{{ ate }}" class="w-full bg-slate-900 border border-slate-800 rounded px-3 py-2">
+    </div>
+    <div class="sm:col-span-2 sm:text-right">
+      <button class="btn"><i data-lucide="search" class="w-4 h-4"></i> Filtrar</button>
+    </div>
+  </div>
+</form>
+
+<section class="card p-5">
+  <h2 class="font-semibold text-lg mb-3 flex items-center gap-2">
+    <i data-lucide="list" class="w-5 h-5"></i>
+    Resultados
+  </h2>
+
+  <ul class="divide-y divide-slate-800/70">
+    {% for r in reservas %}
+      <li class="py-3 grid grid-cols-1 md:grid-cols-12 items-center gap-3">
+        <div class="md:col-span-5 min-w-0">
+          <div class="font-medium truncate">{{ r.area.nome }}</div>
+          <div class="opacity-80 text-sm mt-0.5 truncate">Condomínio: {{ r.area.condominio.nome }}</div>
+        </div>
+        <div class="md:col-span-5">
+          <div class="opacity-80 text-sm">
+            {{ r.inicio|date:"d/m/Y H:i" }} – {{ r.fim|date:"d/m/Y H:i" }}
+          </div>
+        </div>
+        <div class="md:col-span-2 md:text-right">
+          <span class="pill text-white
+            {% if r.status == 'APROVADA' %} bg-emerald-600/80
+            {% elif r.status == 'PENDENTE' %} bg-amber-600/80
+            {% elif r.status == 'CANCELADA' %} bg-slate-600/80
+            {% else %} bg-sky-600/80 {% endif %}">
+            {{ r.get_status_display }}
+          </span>
+        </div>
+      </li>
+    {% empty %}
+      <li class="py-8 text-sm opacity-80 text-center">Nenhuma reserva no período selecionado.</li>
+    {% endfor %}
+  </ul>
+</section>
+
+{% endblock %}

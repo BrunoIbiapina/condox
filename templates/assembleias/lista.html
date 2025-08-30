@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Assembleias{% endblock %}
+{% block content %}
+
+<header class="mb-6">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-semibold tracking-tight flex items-center gap-2">
+      <i data-lucide="users" class="w-6 h-6"></i>
+      Assembleias
+    </h1>
+    <a href="/" class="btn"><i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar</a>
+  </div>
+  <p class="text-gray-500 text-sm mt-2">Veja as assembleias do seu condomínio e os documentos anexos.</p>
+</header>
+
+{% if proximas %}
+<section class="card p-5 mb-6">
+  <h2 class="font-semibold text-lg mb-3 flex items-center gap-2">
+    <i data-lucide="calendar" class="w-5 h-5"></i> Próximas
+  </h2>
+  <ul class="divide-y divide-gray-200">
+    {% for a in proximas %}
+      <li class="py-3 flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <a href="{% url 'assembleias:detalhe' a.id %}" class="font-medium hover:underline">
+            {{ a.titulo }}
+          </a>
+          <div class="text-gray-600 text-sm mt-0.5">
+            <i data-lucide="clock" class="w-4 h-4 inline-block -mt-0.5 mr-1"></i>
+            {{ a.quando|date:"d/m/Y H:i" }}
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          {% if a.convocacao_pdf %}
+            <span class="pill bg-blue-100 text-blue-700">Convocação</span>
+          {% endif %}
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<section class="card p-5">
+  <h2 class="font-semibold text-lg mb-3 flex items-center gap-2">
+    <i data-lucide="list" class="w-5 h-5"></i> Passadas
+  </h2>
+  <ul class="divide-y divide-gray-200">
+    {% for a in passadas %}
+      <li class="py-3 flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <a href="{% url 'assembleias:detalhe' a.id %}" class="font-medium hover:underline">
+            {{ a.titulo }}
+          </a>
+          <div class="text-gray-600 text-sm mt-0.5">
+            <i data-lucide="clock" class="w-4 h-4 inline-block -mt-0.5 mr-1"></i>
+            {{ a.quando|date:"d/m/Y H:i" }}
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          {% if a.ata_pdf %}
+            <span class="pill bg-emerald-100 text-emerald-700">Ata</span>
+          {% endif %}
+        </div>
+      </li>
+    {% empty %}
+      <li class="py-6 text-sm text-gray-500 text-center">Nenhuma assembleia passada.</li>
+    {% endfor %}
+  </ul>
+</section>
+
+{% endblock %}

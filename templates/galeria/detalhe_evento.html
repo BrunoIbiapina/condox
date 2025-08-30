@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}{{ evento.titulo }} • Evento{% endblock %}
+{% block content %}
+
+<header class="mb-6">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-semibold tracking-tight flex items-center gap-2">
+      <i data-lucide="calendar" class="w-6 h-6"></i>
+      {{ evento.titulo }}
+    </h1>
+    <a href="{% url 'galeria:lista' %}" class="btn"><i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar</a>
+  </div>
+  <p class="text-gray-500 text-sm mt-2">
+    {{ evento.data|date:'d/m/Y' }}{% if evento.local %} • {{ evento.local }}{% endif %}
+  </p>
+</header>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div class="md:col-span-2">
+    <div class="card p-5">
+      {% if evento.descricao %}
+        <div class="prose prose-slate max-w-none">
+          {{ evento.descricao|linebreaks }}
+        </div>
+      {% else %}
+        <p class="text-gray-500">Sem descrição adicional.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <aside class="space-y-5">
+    <div class="card p-4">
+      <h3 class="font-semibold mb-2">Informações</h3>
+      <ul class="text-sm text-gray-700 space-y-1">
+        <li><strong>Data:</strong> {{ evento.data|date:'d/m/Y' }}</li>
+        {% if evento.local %}<li><strong>Local:</strong> {{ evento.local }}</li>{% endif %}
+      </ul>
+    </div>
+
+    {% if evento.capa %}
+      <img src="{{ evento.capa.url }}" alt="{{ evento.titulo }}"
+           class="rounded-xl w-full object-cover ring-1 ring-gray-200" />
+    {% endif %}
+  </aside>
+</div>
+
+{% endblock %}

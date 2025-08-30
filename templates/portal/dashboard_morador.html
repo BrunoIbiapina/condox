@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% block title %}Minha Área • CondoX{% endblock %}
+
+{% block content %}
+<header class="mb-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <h1 class="text-2xl font-semibold tracking-tight flex items-center gap-2">
+      <i data-lucide="user-round" class="w-6 h-6"></i>
+      Minha Área
+    </h1>
+    <a href="{% url 'reservas:areas_list' %}" class="btn btn-primary inline-flex items-center justify-center">
+      <i data-lucide="plus" class="w-4 h-4"></i>
+      <span>Nova reserva</span>
+    </a>
+  </div>
+  <p class="text-gray-500 text-sm mt-2">Acompanhe suas reservas, lançamentos e avisos recentes do condomínio.</p>
+  <div class="mt-4 text-right">
+    <a href="{% url 'reservas:historico' %}" class="text-xs link">ver histórico →</a>
+  </div>
+</header>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+  <!-- Coluna esquerda (2/3) -->
+  <section class="lg:col-span-2 space-y-5">
+    <!-- Minhas reservas -->
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-semibold text-lg flex items-center gap-2">
+          <i data-lucide="calendar-check" class="w-5 h-5"></i>
+          Minhas reservas
+        </h2>
+        <a href="{% url 'reservas:areas_list' %}" class="text-sm link flex items-center gap-1">
+          <i data-lucide="calendar" class="w-4 h-4"></i> Reservar
+        </a>
+      </div>
+
+      <ul class="divide-y divide-gray-200">
+        {% for r in minhas_reservas %}
+          <li class="py-3 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div class="font-medium truncate">{{ r.area.nome }}</div>
+              <div class="text-gray-600 text-sm mt-0.5">
+                <i data-lucide="clock" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i>
+                {{ r.inicio|date:'d/m/Y H:i' }} – {{ r.fim|date:'H:i' }}
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="pill
+                {% if r.inicio <= agora and r.fim > agora %}
+                  bg-green-100 text-green-700
+                {% elif r.status == 'APROVADA' %}
+                  bg-blue-100 text-blue-700
+                {% elif r.status == 'PENDENTE' %}
+                  bg-amber-100 text-amber-700
+                {% else %}
+                  bg-gray-100 text-gray-700
+                {% endif %}">
+                {% if r.inicio <= agora and r.fim > agora %}
+                  EM USO
+                {% else %}
+                  {{ r.get_status_display }}
+                {% endif %}
+              </span>
+
+              {% if r.id in cancelaveis_ids %}
+                <form method="post" action="{% url 'reservas:cancelar_reserva' r.id %}" onsubmit="return confirm('Confirmar cancelamento desta reserva?');">
+                  {% csrf_token %}
+                  <button class="pill bg-red-100 text-red-700 hover:bg-red-200" type="submit" title="Cancelar reserva">
+                    Cancelar
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+          </li>
+        {% empty %}
+          <li class="py-8 text-sm text-gray-500 text-center">
+            Nenhuma reserva ainda. Clique em <span class="font-medium">“Nova reserva”</span> para agendar.
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="text-xs text-gray-500 mt-3">Você pode cancelar apenas reservas que ainda não começaram.</p>
+    </div>
+
+    <!-- Avisos -->
+    <div class="card p-5">
+      <h2 class="font-semibold text-lg mb-3 flex items-center gap-2">
+        <i data-lucide="megaphone" class="w-5 h-5"></i>
+        Avisos recentes
+      </h2>
+      <ul class="divide-y divide-gray-200">
+        {% for a in avisos %}
+          <li class="py-3 flex items-center justify-between">
+            <span class="truncate pr-3">{{ a.titulo }}</span>
+            <span class="text-gray-500 text-sm whitespace-nowrap">{{ a.criado_em|date:'d/m' }}</span>
+          </li>
+        {% empty %}
+          <li class="py-6 text-sm text-gray-500 text-center">Sem avisos no momento.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Próximos eventos -->
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-semibold text-lg flex items-center gap-2">
+          <i data-lucide="calendar-days" class="w-5 h-5"></i>
+          Próximos eventos
+        </h2>
+        <a href="{% url 'galeria:lista' %}" class="text-xs link">ver todos →</a>
+      </div>
+
+      <ul class="divide-y divide-gray-200">
+        {% for e in eventos %}
+          <li class="py-3 flex items-center justify-between">
+            <div class="min-w-0 pr-3">
+              <div class="font-semibold truncate">{{ e.titulo }}</div>
+              <div class="text-gray-600 text-sm">
+                {# Para evitar erro com DateField, usar apenas data #}
+                {% if e.data %}{{ e.data|date:'d/m/Y' }}{% else %}—{% endif %}
+                {% if e.local %} • {{ e.local }}{% endif %}
+              </div>
+            </div>
+            <span class="pill bg-indigo-100 text-indigo-700 whitespace-nowrap">Evento</span>
+          </li>
+        {% empty %}
+          <li class="py-6 text-sm text-gray-500 text-center">Nenhum evento programado.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Coluna direita (1/3) -->
+  <aside class="space-y-5">
+    <!-- Meus lançamentos -->
+    <div class="card p-5">
+      <h2 class="font-semibold text-lg mb-3 flex items-center gap-2">
+        <i data-lucide="wallet" class="w-5 h-5"></i>
+        Meus lançamentos
+      </h2>
+
+      <ul class="space-y-3">
+        {% for l in meus_lancamentos %}
+          <li class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div class="font-medium">R$ {{ l.valor|floatformat:2 }}</div>
+              <div class="text-gray-600 text-sm">
+                {{ l.competencia|date:'m/Y' }} • vence {{ l.vencimento|date:'d/m' }}
+              </div>
+            </div>
+            <span class="pill text-white {% if not l.status_color %}bg-gray-500{% endif %}"
+                  {% if l.status_color %}style="background: {{ l.status_color }};"{% endif %}>
+              {{ l.status }}
+            </span>
+          </li>
+        {% empty %}
+          <li class="text-gray-500 text-sm">Nenhum lançamento encontrado.</li>
+        {% endfor %}
+      </ul>
+
+      <div class="mt-4 text-right">
+        <a href="{% url 'financeiro:minhas_cobrancas' %}" class="text-xs link">ver todos →</a>
+      </div>
+    </div>
+
+    <!-- Assembleias -->
+<div class="card p-5">
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="font-semibold text-lg flex items-center gap-2">
+      <i data-lucide="gavel" class="w-5 h-5"></i>
+      Assembleias
+    </h2>
+    <a href="/assembleias/" class="text-xs link">ver todas →</a>
+  </div>
+
+  {% if assembleias_proximas %}
+    <h3 class="text-sm font-medium text-gray-600 mb-2">Próximas</h3>
+    <ul class="divide-y divide-gray-200 mb-4">
+      {% for a in assembleias_proximas %}
+        <li class="py-3 flex items-center justify-between">
+          <div class="min-w-0 pr-3">
+            <a href="{% url 'assembleias:detalhe' a.id %}" class="font-semibold truncate hover:underline">
+              {{ a.titulo }}
+            </a>
+            <div class="text-gray-600 text-sm">
+              {{ a.quando|date:'d/m/Y H:i' }}
+              {% if a.condominio %} • {{ a.condominio.nome }}{% endif %}
+            </div>
+          </div>
+          <span class="pill bg-indigo-100 text-indigo-700 whitespace-nowrap">Em breve</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <h3 class="text-sm font-medium text-gray-600 mb-2">Recentes</h3>
+  <ul class="divide-y divide-gray-200">
+    {% for a in assembleias_passadas %}
+      <li class="py-3">
+        <div class="flex items-center justify-between">
+          <div class="min-w-0 pr-3">
+            <a href="{% url 'assembleias:detalhe' a.id %}" class="font-medium truncate hover:underline">
+              {{ a.titulo }}
+            </a>
+            <div class="text-gray-600 text-sm">
+              {{ a.quando|date:'d/m/Y H:i' }}
+              {% if a.condominio %} • {{ a.condominio.nome }}{% endif %}
+            </div>
+            <div class="text-xs mt-1 space-x-2">
+              {% if a.convocacao_pdf %}
+                <a class="link" href="{{ a.convocacao_pdf.url }}" target="_blank" rel="noopener">Convocação</a>
+              {% endif %}
+              {% if a.ata_pdf %}
+                <a class="link" href="{{ a.ata_pdf.url }}" target="_blank" rel="noopener">Ata final</a>
+              {% endif %}
+            </div>
+          </div>
+          <span class="pill bg-gray-100 text-gray-700 whitespace-nowrap">Concluída</span>
+        </div>
+      </li>
+    {% empty %}
+      <li class="py-6 text-sm text-gray-500 text-center">Nenhuma assembleia encontrada.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+    <!-- Acesso rápido -->
+    <div class="card p-5">
+      <h3 class="font-semibold mb-3">Acesso rápido</h3>
+      <div class="grid grid-cols-2 gap-3">
+        <a href="{% url 'reservas:areas_list' %}" class="card p-3 text-center hover:bg-gray-50 transition">
+          <i data-lucide="calendar-plus" class="w-5 h-5 mx-auto mb-1 text-blue-600"></i>
+          <span class="text-sm">Reservas</span>
+        </a>
+        <a href="{% url 'financeiro:minhas_cobrancas' %}" class="card p-3 text-center hover:bg-gray-50 transition">
+          <i data-lucide="receipt" class="w-5 h-5 mx-auto mb-1 text-emerald-600"></i>
+          <span class="text-sm">Financeiro</span>
+        </a>
+      </div>
+    </div>
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}{{ area.nome }} • Disponibilidade{% endblock %}
+{% block content %}
+
+<header class="mb-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <h1 class="text-2xl font-semibold tracking-tight flex items-center gap-2">
+      <i data-lucide="calendar-days" class="w-6 h-6"></i>
+      {{ area.nome }}
+    </h1>
+    <a href="{% url 'reservas:areas_list' %}" class="btn"><i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar às áreas</a>
+  </div>
+  <p class="text-gray-500 text-sm mt-2">
+    Disponibilidade para <strong>{{ dia|date:"d/m/Y" }}</strong>.
+    {% if is_hoje %}<span class="pill bg-green-100 text-green-700 ml-2">Hoje</span>{% endif %}
+  </p>
+</header>
+
+<section class="card p-5 mb-5">
+  <div class="grid sm:grid-cols-3 gap-4 text-sm">
+    <div class="flex items-center gap-2">
+      <i data-lucide="map-pin" class="w-4 h-4"></i>
+      <div>
+        <div class="text-gray-500">Condomínio</div>
+        <div class="font-medium">{{ area.condominio.nome }}</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <i data-lucide="clock" class="w-4 h-4"></i>
+      <div>
+        <div class="text-gray-500">Janela do dia</div>
+        <div class="font-medium">{{ area.hora_inicio|default:"00:00" }} – {{ area.hora_fim|default:"23:59" }}</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <i data-lucide="calendar" class="w-4 h-4"></i>
+      <div>
+        <div class="text-gray-500">Dias permitidos</div>
+        <div class="font-medium">
+          {% if area.dias_permitidos and area.dias_permitidos|length %}
+            {{ area.dias_permitidos|join:", " }} <span class="text-gray-400">(0=Seg..6=Dom)</span>
+          {% else %}
+            Todos
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<form method="get" class="card p-4 mb-5">
+  <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+    <label class="text-sm text-gray-600">Escolha o dia:</label>
+    <input type="date" name="data" value="{{ dia|date:'Y-m-d' }}"
+           class="bg-white border border-gray-300 rounded px-3 py-2">
+    <button class="btn"><i data-lucide="search" class="w-4 h-4"></i> Ver</button>
+
+    <div class="ml-auto flex items-center gap-3 text-xs text-gray-500">
+      <span class="pill bg-blue-100 text-blue-700">Disponível</span>
+      <span class="pill bg-gray-100 text-gray-700">Passado</span>
+    </div>
+  </div>
+</form>
+
+<section class="card p-5">
+  <h2 class="font-semibold text-lg mb-3 flex items-center gap-2">
+    <i data-lucide="clock" class="w-5 h-5"></i>
+    Horários disponíveis — {{ dia|date:"d/m/Y" }}
+  </h2>
+
+  {% if slots %}
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
+      {% for s in slots %}
+        {% with inicio_str=s.0|date:'Y-m-d H:i' %}
+          {% if is_hoje and inicio_str <= now_str %}
+            <div class="w-full text-left card px-3 py-2 opacity-60 pointer-events-none flex items-center justify-between">
+              <span>{{ s.0|date:"H:i" }} – {{ s.1|date:"H:i" }}</span>
+              <span class="pill bg-gray-100 text-gray-700">Passado</span>
+            </div>
+          {% else %}
+            {% if pode_reservar %}
+              <form method="post" action="{% url 'reservas:agendar' %}">
+                {% csrf_token %}
+                <input type="hidden" name="area_id" value="{{ area.id }}">
+                <input type="hidden" name="inicio" value="{{ s.0|date:'c' }}">
+                <input type="hidden" name="fim" value="{{ s.1|date:'c' }}">
+                <button class="w-full text-left card px-3 py-2 hover:bg-blue-50 transition flex items-center justify-between">
+                  <span>{{ s.0|date:"H:i" }} – {{ s.1|date:"H:i" }}</span>
+                  <span class="pill bg-blue-100 text-blue-700">Reservar</span>
+                </button>
+              </form>
+            {% else %}
+              <div class="w-full text-left card px-3 py-2 flex items-center justify-between cursor-not-allowed" title="Porteiro apenas visualiza">
+                <span>{{ s.0|date:"H:i" }} – {{ s.1|date:"H:i" }}</span>
+                <span class="pill bg-gray-100 text-gray-700">Somente visualização</span>
+              </div>
+            {% endif %}
+          {% endif %}
+        {% endwith %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-gray-600 text-sm">Nenhum horário disponível para as regras definidas. Tente outro dia.</div>
+  {% endif %}
+</section>
+
+<p class="text-gray-400 text-xs mt-4">
+  Dica: o Gestor pode definir <strong>datas bloqueadas</strong> e <strong>regras de dia/horário</strong> nas configurações da área.
+</p>
+
+{% endblock %}

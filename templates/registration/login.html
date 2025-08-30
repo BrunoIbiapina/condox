@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Entrar • CondoX{% endblock %}
+
+{% block content %}
+<style>
+  /* Esconde a navbar e o bloco de mensagens só nesta página */
+  header.appbar { display: none !important; }
+  .container.pt-4 { display: none !important; } /* mensagens do base */
+
+  /* Faz o main ocupar tela cheia e remove paddings/limites do base */
+  #conteudo {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+  html, body { height: 100%; }
+</style>
+
+<!-- Fundo com imagem (tela cheia) -->
+<div class="fixed inset-0">
+  <img
+    src="{% static 'imagens/fundo-condominio.jpg' %}"
+    alt="Condomínio"
+    class="w-full h-full object-cover"
+  />
+  <!-- overlay para contraste -->
+  <div class="absolute inset-0 bg-black/50"></div>
+</div>
+
+<!-- Card central com vidro fosco -->
+<div class="relative min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-sm bg-white/85 backdrop-blur-md rounded-2xl shadow-2xl p-8">
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">CondoX</h1>
+      <p class="text-gray-500 text-sm">Acesse sua área do morador</p>
+    </div>
+
+    {% if form.errors %}
+      <div class="mb-4 p-3 rounded-lg bg-red-100 text-red-700 text-sm">
+        Usuário ou senha incorretos. Tente novamente.
+      </div>
+    {% endif %}
+
+    <form method="post" class="space-y-5" novalidate>
+      {% csrf_token %}
+
+      <div>
+        <label for="id_username" class="block text-sm font-medium text-gray-700">Usuário</label>
+        <input
+          type="text"
+          name="username"
+          id="id_username"
+          autocomplete="username"
+          class="w-full p-3 border rounded-lg bg-white/90 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          required
+        />
+      </div>
+
+      <div>
+        <label for="id_password" class="block text-sm font-medium text-gray-700">Senha</label>
+        <input
+          type="password"
+          name="password"
+          id="id_password"
+          autocomplete="current-password"
+          class="w-full p-3 border rounded-lg bg-white/90 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          required
+        />
+      </div>
+
+      {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+      {% endif %}
+
+      <button
+        type="submit"
+        class="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition"
+      >
+        Entrar
+      </button>
+    </form>
+
+    <p class="mt-5 text-center text-sm text-gray-600">
+      Esqueceu a senha?
+      <a href="{% url 'password_reset' %}" class="text-indigo-600 hover:underline">Recuperar</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

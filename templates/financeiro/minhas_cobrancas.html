@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Meus lançamentos • CondoX{% endblock %}
+{% block content %}
+
+<header class="mb-6">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-semibold tracking-tight flex items-center gap-2">
+      <i data-lucide="wallet" class="w-6 h-6"></i>
+      Meus lançamentos
+    </h1>
+    <a href="/" class="btn"><i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar</a>
+  </div>
+  <p class="text-gray-500 text-sm mt-2">Veja todos os seus lançamentos do condomínio com filtros por período e status.</p>
+</header>
+
+<form method="get" class="card p-4 mb-5">
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+    <div>
+      <label class="text-sm text-gray-600">Status</label>
+      <select name="status" class="w-full bg-white border border-gray-300 rounded px-3 py-2">
+        <option value="" {% if not status %}selected{% endif %}>Todos</option>
+        <option value="PENDENTE" {% if status == 'PENDENTE' %}selected{% endif %}>Pendentes</option>
+        <option value="VENCIDO" {% if status == 'VENCIDO' %}selected{% endif %}>Vencidos</option>
+        <option value="PAGO" {% if status == 'PAGO' %}selected{% endif %}>Pagos</option>
+      </select>
+    </div>
+    <div>
+      <label class="text-sm text-gray-600">Venc. de</label>
+      <input type="date" name="de" value="{{ de }}" class="w-full bg-white border border-gray-300 rounded px-3 py-2">
+    </div>
+    <div>
+      <label class="text-sm text-gray-600">Venc. até</label>
+      <input type="date" name="ate" value="{{ ate }}" class="w-full bg-white border border-gray-300 rounded px-3 py-2">
+    </div>
+    <div class="flex gap-2">
+      <button class="btn">Aplicar filtros</button>
+      <a href="?"" class="btn">Limpar</a>
+    </div>
+  </div>
+</form>
+
+<div class="grid grid-cols-1 gap-4">
+  {% for l in page_obj %}
+    <div class="card p-5 flex items-start justify-between gap-4">
+      <div class="min-w-0">
+        <div class="text-lg font-semibold">R$ {{ l.valor }}</div>
+        <div class="text-gray-600 text-sm">
+          {{ l.competencia|date:'m/Y' }} • vence {{ l.vencimento|date:'d/m' }}
+          {% if l.unidade %} • {{ l.unidade }}{% endif %}
+          {% if l.descricao %}<div class="text-gray-500 mt-1">{{ l.descricao }}</div>{% endif %}
+        </div>
+      </div>
+      <span class="pill text-white whitespace-nowrap"
+            style="background: {{ l.status_color }};">
+        {{ l.status }}
+      </span>
+    </div>
+  {% empty %}
+    <div class="card p-6 text-center text-gray-500">Nenhum lançamento encontrado com os filtros atuais.</div>
+  {% endfor %}
+</div>
+
+{% if page_obj.paginator.num_pages > 1 %}
+  <nav class="mt-6 flex items-center justify-between text-sm">
+    <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    <div class="flex gap-2">
+      {% if page_obj.has_previous %}
+        <a class="btn" href="?page={{ page_obj.previous_page_number }}&status={{ status }}&de={{ de }}&ate={{ ate }}">← Anterior</a>
+      {% endif %}
+      {% if page_obj.has_next %}
+        <a class="btn" href="?page={{ page_obj.next_page_number }}&status={{ status }}&de={{ de }}&ate={{ ate }}">Próxima →</a>
+      {% endif %}
+    </div>
+  </nav>
+{% endif %}
+
+{% endblock %}

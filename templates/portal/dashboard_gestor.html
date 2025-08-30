@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block title %}Gestor • CondoX{% endblock %}
+{% block content %}
+
+<header class="mb-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <h1 class="text-2xl font-semibold tracking-tight flex items-center gap-2">
+      <i data-lucide="gauge" class="w-6 h-6"></i>
+      Painel do Gestor
+    </h1>
+    <div class="flex items-center gap-3">
+      <a href="/reservas/areas/" class="btn btn-secondary"><i data-lucide="calendar-plus" class="w-4 h-4"></i> Nova reserva</a>
+      <a href="/admin/" class="btn btn-primary"><i data-lucide="settings" class="w-4 h-4"></i> Admin</a>
+    </div>
+  </div>
+  <p class="text-gray-500 text-sm mt-2">Visão geral do condomínio: reservas, financeiro e avisos.</p>
+</header>
+
+<!-- Métricas (cards coloridos claros) -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+  <div class="card p-5 border-red-200 bg-red-50">
+    <div class="text-sm text-red-700 flex items-center gap-2">
+      <i data-lucide="alert-triangle" class="w-4 h-4"></i> Inadimplência
+    </div>
+    <div class="mt-2 text-4xl font-bold text-red-700">{{ inadimplentes }}</div>
+    <p class="text-xs text-red-700/80 mt-1">Lançamentos vencidos e não pagos</p>
+  </div>
+
+  <div class="card p-5 border-amber-200 bg-amber-50">
+    <div class="text-sm text-amber-700 flex items-center gap-2">
+      <i data-lucide="clock" class="w-4 h-4"></i> Pendentes (a vencer)
+    </div>
+    <div class="mt-2 text-4xl font-bold text-amber-700">{{ pendentes }}</div>
+    <p class="text-xs text-amber-700/80 mt-1">Próximos vencimentos</p>
+  </div>
+
+  <div class="card p-5 border-emerald-200 bg-emerald-50">
+    <div class="text-sm text-emerald-700 flex items-center gap-2">
+      <i data-lucide="map-pin" class="w-4 h-4"></i> Áreas ativas
+    </div>
+    <div class="mt-2 text-4xl font-bold text-emerald-700">{{ areas|length }}</div>
+    <p class="text-xs text-emerald-700/80 mt-1">Cadastradas para reserva</p>
+  </div>
+</section>
+
+<!-- Listas -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+  <!-- Próximas reservas -->
+  <div class="card p-5">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-semibold text-lg flex items-center gap-2">
+        <i data-lucide="calendar-days" class="w-5 h-5"></i>
+        Próximas reservas
+      </h2>
+      <a href="/reservas/areas/" class="text-sm link flex items-center gap-1">
+        <i data-lucide="search" class="w-4 h-4"></i> ver disponibilidade
+      </a>
+    </div>
+
+    <ul class="divide-y divide-gray-200">
+      {% for r in reservas_proximas %}
+        <li class="py-3 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <div class="font-medium truncate">{{ r.area.nome }}</div>
+            <div class="text-gray-600 text-sm mt-0.5">
+              {{ r.inicio|date:"d/m/Y H:i" }} – {{ r.fim|date:"H:i" }}
+              <span class="text-gray-500">• {{ r.morador.username }}</span>
+            </div>
+          </div>
+
+          {% with em_uso=r.inicio|date:"U"|add:"0"|floatformat:0 %}
+          <span class="pill 
+            {% if r.inicio <= agora and r.fim > agora %}
+              bg-green-100 text-green-700
+            {% elif r.status == 'APROVADA' %}
+              bg-blue-100 text-blue-700
+            {% elif r.status == 'PENDENTE' %}
+              bg-amber-100 text-amber-700
+            {% else %}
+              bg-gray-100 text-gray-700
+            {% endif %}">
+            {% if r.inicio <= agora and r.fim > agora %}EM USO{% else %}{{ r.get_status_display }}{% endif %}
+          </span>
+          {% endwith %}
+        </li>
+      {% empty %}
+        <li class="py-8 text-sm text-gray-500 text-center">Sem reservas futuras.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Avisos recentes -->
+  <div class="card p-5">
+    <h2 class="font-semibold text-lg mb-3 flex items-center gap-2">
+      <i data-lucide="megaphone" class="w-5 h-5"></i>
+      Avisos recentes
+    </h2>
+    <ul class="divide-y divide-gray-200">
+      {% for a in avisos %}
+        <li class="py-3 flex items-center justify-between">
+          <span class="truncate pr-3">{{ a.titulo }}</span>
+          <span class="text-gray-500 text-sm whitespace-nowrap">{{ a.criado_em|date:"d/m" }}</span>
+        </li>
+      {% empty %}
+        <li class="py-6 text-sm text-gray-500 text-center">Sem avisos no momento.</li>
+      {% endfor %}
+    </ul>
+    <div class="mt-4 text-right">
+      <a href="/admin/comunicados/aviso/" class="text-xs link">gerenciar avisos →</a>
+    </div>
+  </div>
+
+</section>
+
+<!-- Acesso rápido (cards brancos) -->
+<section class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-5">
+  <a href="/admin/condominios/" class="card p-5 hover:bg-gray-50 transition flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <i data-lucide="building-2" class="w-6 h-6 text-blue-600"></i>
+      <div>
+        <div class="font-semibold">Condomínios</div>
+        <div class="text-xs text-gray-500">Gerenciar blocos e unidades</div>
+      </div>
+    </div>
+    <i data-lucide="arrow-right" class="w-4 h-4 text-gray-400"></i>
+  </a>
+
+  <a href="/admin/financeiro/lancamento/" class="card p-5 hover:bg-gray-50 transition flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <i data-lucide="wallet" class="w-6 h-6 text-emerald-600"></i>
+      <div>
+        <div class="font-semibold">Financeiro</div>
+        <div class="text-xs text-gray-500">Lançamentos e pagamentos</div>
+      </div>
+    </div>
+    <i data-lucide="arrow-right" class="w-4 h-4 text-gray-400"></i>
+  </a>
+
+  <a href="/admin/reservas/areareservavel/" class="card p-5 hover:bg-gray-50 transition flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <i data-lucide="map-pin" class="w-6 h-6 text-purple-600"></i>
+      <div>
+        <div class="font-semibold">Áreas reserváveis</div>
+        <div class="text-xs text-gray-500">Dias/horários permitidos</div>
+      </div>
+    </div>
+    <i data-lucide="arrow-right" class="w-4 h-4 text-gray-400"></i>
+  </a>
+</section>
+
+{% endblock %}

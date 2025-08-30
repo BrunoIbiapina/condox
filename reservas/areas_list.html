@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Reservas • Áreas Disponíveis{% endblock %}
+{% block content %}
+
+<header class="mb-6">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div class="flex items-center gap-2">
+      <i data-lucide="map-pin" class="w-6 h-6"></i>
+      <h1 class="text-2xl font-semibold tracking-tight">Áreas para reserva</h1>
+    </div>
+
+    <!-- Busca opcional (GET ?q=...) -->
+    <form method="get" class="flex items-center gap-2">
+      <label for="q" class="sr-only">Buscar áreas</label>
+      <input id="q" name="q" value="{{ request.GET.q }}"
+             placeholder="Buscar por nome ou condomínio..."
+             class="bg-slate-900 border border-slate-800 rounded px-3 py-2 text-sm w-64">
+      <button class="btn"><i data-lucide="search" class="w-4 h-4"></i> Buscar</button>
+      <a href="{% url 'portal:home' %}" class="btn"><i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar</a>
+    </form>
+  </div>
+
+  <p class="opacity-70 text-sm mt-2">
+    Escolha uma área para ver a disponibilidade por dia e horário.
+  </p>
+</header>
+
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+  {% for a in areas %}
+    <div class="card p-5 hover:brightness-110 transition">
+      <div class="flex items-center justify-between">
+        <div class="min-w-0">
+          <div class="font-semibold text-lg truncate">{{ a.nome }}</div>
+          <div class="opacity-80 text-sm truncate mt-1">
+            Condomínio: {{ a.condominio.nome }}
+          </div>
+        </div>
+
+        <!-- Ações -->
+        <div class="flex items-center gap-2 shrink-0">
+          <!-- Ver hoje leva para a tela com ?data=hoje -->
+          <a class="btn text-sm"
+             href="{% url 'reservas:area_detail' a.id %}?data={{ now|date:'Y-m-d' }}">
+            Hoje
+          </a>
+          <a class="btn btn-primary text-sm"
+             href="{% url 'reservas:area_detail' a.id %}">
+            Abrir
+          </a>
+        </div>
+      </div>
+
+      <div class="opacity-80 text-sm mt-4 space-y-1">
+        <div class="truncate">
+          <i data-lucide="clock" class="w-4 h-4 inline-block -mt-1 mr-1"></i>
+          Janela: {{ a.hora_inicio|default:"00:00" }}–{{ a.hora_fim|default:"23:59" }}
+        </div>
+        {% if a.dias_permitidos %}
+          <div class="truncate">
+            <i data-lucide="calendar" class="w-4 h-4 inline-block -mt-1 mr-1"></i>
+            Dias: {{ a.dias_permitidos|join:", " }} <span class="opacity-70">(0=Seg..6=Dom)</span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  {% empty %}
+    <div class="col-span-full card p-6 text-center opacity-80">
+      Nenhuma área cadastrada.
+    </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

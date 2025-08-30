@@ -1,0 +1,73 @@
+{% extends "admin/index.html" %}
+{% load admin_dashboard %}
+
+{% block content %}
+<div class="container-fluid mb-3">
+  <div class="row g-3">
+
+    <div class="col-lg-3 col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Em uso agora</h5>
+            <i class="fa fa-bolt text-warning"></i>
+          </div>
+          <p class="display-6 fw-bold my-2">{% kpi_em_uso_agora %}</p>
+          <small class="text-muted">Áreas atualmente em andamento</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Reservas hoje</h5>
+            <i class="fa fa-calendar-day text-info"></i>
+          </div>
+          <p class="display-6 fw-bold my-2">{% kpi_reservas_hoje %}</p>
+          <small class="text-muted">Total do dia</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Inadimplentes</h5>
+            <i class="fa fa-triangle-exclamation text-danger"></i>
+          </div>
+          <p class="display-6 fw-bold my-2">{% kpi_inadimplentes %}</p>
+          <small class="text-muted">Vencidos e não pagos</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Pendentes</h5>
+            <i class="fa fa-clock text-primary"></i>
+          </div>
+          <p class="display-6 fw-bold my-2">{% kpi_pendentes %}</p>
+          <small class="text-muted">Lançamentos a vencer</small>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="mt-3 d-flex gap-2">
+    <a href="/" class="btn btn-primary">
+      <i class="fa fa-gauge me-1"></i> Painel do Gestor
+    </a>
+    <a href="/?tab=reservas" class="btn btn-outline-light">
+      <i class="fa fa-list me-1"></i> Reservas (tempo real)
+    </a>
+  </div>
+</div>
+
+{{ block.super }} {# mantém a listagem padrão de apps e ações recentes #}
+{% endblock %}
