@@ -1,0 +1,94 @@
+{# templates/admin/_stats_cards.html #}
+<div class="mt-4">
+  <div class="row g-3">
+
+    <!-- Em uso agora -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Em uso agora</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for r in em_uso %}
+            <li class="list-group-item d-flex justify-content-between">
+              <span>
+                <strong>{{ r.area.nome }}</strong> —
+                {{ r.morador }} (até {{ r.fim|date:"H:i" }})
+              </span>
+              <span class="badge bg-success">em andamento</span>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted">Nenhuma área em uso.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Reservas hoje -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h5 class="mb-0">Reservas de hoje</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for r in reservas_hoje %}
+            <li class="list-group-item d-flex justify-content-between">
+              <span>
+                <strong>{{ r.area.nome }}</strong> —
+                {{ r.morador }} ({{ r.inicio|date:"H:i" }}–{{ r.fim|date:"H:i" }})
+              </span>
+              <span class="badge bg-primary">{{ r.get_status_display }}</span>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted">Nenhuma reserva hoje.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Inadimplentes -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm mt-3">
+        <div class="card-header">
+          <h5 class="mb-0">Inadimplentes</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for l in inadimplentes %}
+            <li class="list-group-item d-flex justify-content-between">
+              <span>
+                {{ nome_do_morador(l) }} —
+                vence em {{ l.vencimento|date:"d/m" }}
+              </span>
+              <span class="badge bg-danger">em atraso</span>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted">Nenhum inadimplente.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Pendentes -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm mt-3">
+        <div class="card-header">
+          <h5 class="mb-0">Pendentes</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for l in pendentes %}
+            <li class="list-group-item d-flex justify-content-between">
+              <span>
+                {{ nome_do_morador(l) }} —
+                vence em {{ l.vencimento|date:"d/m" }}
+              </span>
+              <span class="badge bg-success">a vencer</span>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted">Nenhum lançamento pendente.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>

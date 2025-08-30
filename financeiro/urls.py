@@ -6,4 +6,5 @@ app_name = "financeiro"
 
 urlpatterns = [
     path("meus/", views.minhas_cobrancas, name="minhas_cobrancas"),
+    path("enviar-comprovante/<int:pk>/", views.enviar_comprovante, name="enviar_comprovante"),
 ]

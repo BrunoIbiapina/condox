@@ -4,6 +4,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
 from django.urls import reverse_lazy
+from portal import views as portal_views
+from assembleias import views as asm_views
+
+
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -14,6 +20,9 @@ urlpatterns = [
     path('eventos/', include('galeria.urls', namespace='galeria')),
     path('financeiro/', include('financeiro.urls', namespace='financeiro')),
     path("assembleias/", include(("assembleias.urls", "assembleias"), namespace="assembleias")),
+    path("", portal_views.home, name="home"),
+    path("", asm_views.lista, name="home"),
+
 ]
 
 

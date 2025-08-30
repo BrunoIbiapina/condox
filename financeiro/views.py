@@ -1,10 +1,13 @@
 # financeiro/views.py
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.views.decorators.http import require_POST
+from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 
 from .models import Lancamento
 
@@ -30,7 +33,7 @@ def minhas_cobrancas(request):
         Q(destinatarios=request.user)
     )
 
-    # filtro por status (o campo status pode ser calculado nas props, então filtramos por regra)
+    # filtro por status
     if status == "PENDENTE":
         qs = qs.filter(pago_em__isnull=True, vencimento__gte=hoje)
     elif status == "VENCIDO":
@@ -38,17 +41,17 @@ def minhas_cobrancas(request):
     elif status == "PAGO":
         qs = qs.filter(pago_em__isnull=False)
 
-    # filtro por data de vencimento (opcional)
+    # filtro por data de vencimento (DateField → sem __date)
     try:
         if de_str:
             de = datetime.strptime(de_str, "%Y-%m-%d").date()
-            qs = qs.filter(vencimento__date__gte=de)
+            qs = qs.filter(vencimento__gte=de)
     except Exception:
         de_str = ""
     try:
         if ate_str:
             ate = datetime.strptime(ate_str, "%Y-%m-%d").date()
-            qs = qs.filter(vencimento__date__lte=ate)
+            qs = qs.filter(vencimento__lte=ate)
     except Exception:
         ate_str = ""
 
@@ -66,3 +69,34 @@ def minhas_cobrancas(request):
         "hoje": hoje,
     }
     return render(request, "financeiro/minhas_cobrancas.html", ctx)
+
+@login_required
+@require_POST
+def enviar_comprovante(request, pk):
+    """
+    Upload do comprovante pelo morador, somente se o lançamento for visível a ele.
+    """
+    lanc = get_object_or_404(Lancamento, pk=pk)
+
+    user = request.user
+    autorizado = False
+    if getattr(lanc, "morador_alvo_id", None) == user.id:
+        autorizado = True
+    elif getattr(lanc, "unidade_id", None) and getattr(lanc.unidade, "morador_id", None) == user.id:
+        autorizado = True
+    elif lanc.destinatarios.filter(pk=user.pk).exists():
+        autorizado = True
+
+    if not autorizado:
+        raise PermissionDenied("Sem permissão para enviar comprovante deste lançamento.")
+
+    file = request.FILES.get("comprovante_pdf")
+    if not file:
+        messages.error(request, "Selecione um arquivo.")
+        return redirect(request.META.get("HTTP_REFERER", "/"))
+
+    lanc.comprovante_pdf = file
+    lanc.marcar_comprovante()
+    lanc.save(update_fields=["comprovante_pdf", "comprovante_enviado_em"])
+    messages.success(request, "Comprovante enviado! Aguarde conferência do gestor.")
+    return redirect(request.META.get("HTTP_REFERER", "/"))
