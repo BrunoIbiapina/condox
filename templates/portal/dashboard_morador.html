@@ -2,6 +2,18 @@
 {% block title %}Minha Área • CondoX{% endblock %}
 
 {% block content %}
+{% if DEBUG_BANNER %}
+  <div style="background:#16a34a;color:#fff;padding:10px 14px;border-radius:12px;margin-bottom:14px;font-weight:800;letter-spacing:.5px">
+    ✅ DEBUG: dashboard_morador.html carregado (forçado pela view)
+  </div>
+{% endif %}
+
+<style>
+  /* realce sutil pra garantir que o CSS daqui está valendo */
+  .card { border-radius: 16px; }
+  .pill { border-radius: 999px; padding: .25rem .6rem; font-weight: 700; }
+</style>
+
 <header class="mb-6">
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <h1 class="text-2xl font-semibold tracking-tight flex items-center gap-2">
@@ -116,7 +128,6 @@
             <div class="min-w-0 pr-3">
               <div class="font-semibold truncate">{{ e.titulo }}</div>
               <div class="text-gray-600 text-sm">
-                {# Para evitar erro com DateField, usar apenas data #}
                 {% if e.data %}{{ e.data|date:'d/m/Y' }}{% else %}—{% endif %}
                 {% if e.local %} • {{ e.local }}{% endif %}
               </div>
@@ -164,65 +175,65 @@
     </div>
 
     <!-- Assembleias -->
-<div class="card p-5">
-  <div class="flex items-center justify-between mb-3">
-    <h2 class="font-semibold text-lg flex items-center gap-2">
-      <i data-lucide="gavel" class="w-5 h-5"></i>
-      Assembleias
-    </h2>
-    <a href="/assembleias/" class="text-xs link">ver todas →</a>
-  </div>
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-semibold text-lg flex items-center gap-2">
+          <i data-lucide="gavel" class="w-5 h-5"></i>
+          Assembleias
+        </h2>
+        <a href="/assembleias/" class="text-xs link">ver todas →</a>
+      </div>
 
-  {% if assembleias_proximas %}
-    <h3 class="text-sm font-medium text-gray-600 mb-2">Próximas</h3>
-    <ul class="divide-y divide-gray-200 mb-4">
-      {% for a in assembleias_proximas %}
-        <li class="py-3 flex items-center justify-between">
-          <div class="min-w-0 pr-3">
-            <a href="{% url 'assembleias:detalhe' a.id %}" class="font-semibold truncate hover:underline">
-              {{ a.titulo }}
-            </a>
-            <div class="text-gray-600 text-sm">
-              {{ a.quando|date:'d/m/Y H:i' }}
-              {% if a.condominio %} • {{ a.condominio.nome }}{% endif %}
-            </div>
-          </div>
-          <span class="pill bg-indigo-100 text-indigo-700 whitespace-nowrap">Em breve</span>
-        </li>
-      {% endfor %}
-    </ul>
-  {% endif %}
+      {% if assembleias_proximas %}
+        <h3 class="text-sm font-medium text-gray-600 mb-2">Próximas</h3>
+        <ul class="divide-y divide-gray-200 mb-4">
+          {% for a in assembleias_proximas %}
+            <li class="py-3 flex items-center justify-between">
+              <div class="min-w-0 pr-3">
+                <a href="{% url 'assembleias:detalhe' a.id %}" class="font-semibold truncate hover:underline">
+                  {{ a.titulo }}
+                </a>
+                <div class="text-gray-600 text-sm">
+                  {{ a.quando|date:'d/m/Y H:i' }}
+                  {% if a.condominio %} • {{ a.condominio.nome }}{% endif %}
+                </div>
+              </div>
+              <span class="pill bg-indigo-100 text-indigo-700 whitespace-nowrap">Em breve</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
 
-  <h3 class="text-sm font-medium text-gray-600 mb-2">Recentes</h3>
-  <ul class="divide-y divide-gray-200">
-    {% for a in assembleias_passadas %}
-      <li class="py-3">
-        <div class="flex items-center justify-between">
-          <div class="min-w-0 pr-3">
-            <a href="{% url 'assembleias:detalhe' a.id %}" class="font-medium truncate hover:underline">
-              {{ a.titulo }}
-            </a>
-            <div class="text-gray-600 text-sm">
-              {{ a.quando|date:'d/m/Y H:i' }}
-              {% if a.condominio %} • {{ a.condominio.nome }}{% endif %}
+      <h3 class="text-sm font-medium text-gray-600 mb-2">Recentes</h3>
+      <ul class="divide-y divide-gray-200">
+        {% for a in assembleias_passadas %}
+          <li class="py-3">
+            <div class="flex items-center justify-between">
+              <div class="min-w-0 pr-3">
+                <a href="{% url 'assembleias:detalhe' a.id %}" class="font-medium truncate hover:underline">
+                  {{ a.titulo }}
+                </a>
+                <div class="text-gray-600 text-sm">
+                  {{ a.quando|date:'d/m/Y H:i' }}
+                  {% if a.condominio %} • {{ a.condominio.nome }}{% endif %}
+                </div>
+                <div class="text-xs mt-1 space-x-2">
+                  {% if a.convocacao_pdf %}
+                    <a class="link" href="{{ a.convocacao_pdf.url }}" target="_blank" rel="noopener">Convocação</a>
+                  {% endif %}
+                  {% if a.ata_pdf %}
+                    <a class="link" href="{{ a.ata_pdf.url }}" target="_blank" rel="noopener">Ata final</a>
+                  {% endif %}
+                </div>
+              </div>
+              <span class="pill bg-gray-100 text-gray-700 whitespace-nowrap">Concluída</span>
             </div>
-            <div class="text-xs mt-1 space-x-2">
-              {% if a.convocacao_pdf %}
-                <a class="link" href="{{ a.convocacao_pdf.url }}" target="_blank" rel="noopener">Convocação</a>
-              {% endif %}
-              {% if a.ata_pdf %}
-                <a class="link" href="{{ a.ata_pdf.url }}" target="_blank" rel="noopener">Ata final</a>
-              {% endif %}
-            </div>
-          </div>
-          <span class="pill bg-gray-100 text-gray-700 whitespace-nowrap">Concluída</span>
-        </div>
-      </li>
-    {% empty %}
-      <li class="py-6 text-sm text-gray-500 text-center">Nenhuma assembleia encontrada.</li>
-    {% endfor %}
-  </ul>
-</div>
+          </li>
+        {% empty %}
+          <li class="py-6 text-sm text-gray-500 text-center">Nenhuma assembleia encontrada.</li>
+        {% endfor %}
+      </ul>
+    </div>
 
     <!-- Acesso rápido -->
     <div class="card p-5">

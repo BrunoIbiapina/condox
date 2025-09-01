@@ -9,8 +9,12 @@
       Painel do Gestor
     </h1>
     <div class="flex items-center gap-3">
-      <a href="/reservas/areas/" class="btn btn-secondary"><i data-lucide="calendar-plus" class="w-4 h-4"></i> Nova reserva</a>
-      <a href="/admin/" class="btn btn-primary"><i data-lucide="settings" class="w-4 h-4"></i> Admin</a>
+      <a href="/reservas/areas/" class="btn btn-secondary">
+        <i data-lucide="calendar-plus" class="w-4 h-4"></i> Nova reserva
+      </a>
+      <a href="/admin/" class="btn btn-primary">
+        <i data-lucide="settings" class="w-4 h-4"></i> Admin
+      </a>
     </div>
   </div>
   <p class="text-gray-500 text-sm mt-2">Visão geral do condomínio: reservas, financeiro e avisos.</p>
@@ -69,7 +73,6 @@
             </div>
           </div>
 
-          {% with em_uso=r.inicio|date:"U"|add:"0"|floatformat:0 %}
           <span class="pill 
             {% if r.inicio <= agora and r.fim > agora %}
               bg-green-100 text-green-700
@@ -80,9 +83,12 @@
             {% else %}
               bg-gray-100 text-gray-700
             {% endif %}">
-            {% if r.inicio <= agora and r.fim > agora %}EM USO{% else %}{{ r.get_status_display }}{% endif %}
+            {% if r.inicio <= agora and r.fim > agora %}
+              EM USO
+            {% else %}
+              {{ r.get_status_display }}
+            {% endif %}
           </span>
-          {% endwith %}
         </li>
       {% empty %}
         <li class="py-8 text-sm text-gray-500 text-center">Sem reservas futuras.</li>

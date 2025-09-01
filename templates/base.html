@@ -3,213 +3,216 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>
-      {% block title %}
-        CondoX
-      {% endblock %}
-    </title>
+    <title>{% block title %}CondoX{% endblock %}</title>
 
-    <!-- Fonte + Tailwind CDN -->
+    <!-- Fonts + Tailwind -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Tema claro -->
     <style>
-      :root {
-        --page-bg: #f9fafb;
-        --text: #111827;
-        --muted: #6b7280;
-        --card-bg: #ffffff;
-        --card-border: #e5e7eb;
-        --shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+      :root{
+        --brand:#16a34a;           /* verde-600 */
+        --brand-500:#22c55e;       /* verde-500 hover */
+        --ink:#0f172a;             /* slate-900 */
+        --muted:#64748b;           /* slate-500 */
+        --card:#ffffff;
+        --line:#e2e8f0;            /* slate-200 */
+        --bg:#f8fafc;              /* slate-50 */
+        --chip:#f1f5f9;            /* slate-100 */
+      }
+      html,body{height:100%}
+      body{font-family:Inter, ui-sans-serif, system-ui; background:var(--bg); color:var(--ink);}
+      .card{background:var(--card); border:1px solid var(--line); border-radius:18px; box-shadow:0 8px 30px rgba(2,6,23,.05);}
+      .btn{display:inline-flex; align-items:center; gap:.5rem; padding:.65rem 1rem; border-radius:12px; border:1px solid var(--line); font-weight:600;}
+      .btn-primary{background:var(--brand); color:#fff; border-color:var(--brand);}
+      .btn-primary:hover{background:var(--brand-500)}
+      .btn-ghost{background:#fff}
+      .chip{background:var(--chip); color:var(--muted); padding:.35rem .6rem; border-radius:999px; font-weight:600; font-size:.8rem}
+      .field{background:#fff; border:1px solid var(--line); border-radius:12px; padding:.65rem .9rem; outline:none}
+      .field:focus{border-color:var(--brand); box-shadow:0 0 0 4px rgba(34,197,94,.15)}
+      .pill-input{display:flex; gap:.5rem; background:#fff; border:2px solid #cce8d6; border-radius:999px; padding:.35rem; box-shadow:inset 0 0 0 1px #def7e6}
+      .pill-input input{border:0; outline:0; padding:.55rem .9rem; border-radius:999px}
+      .sidebar-link{display:flex; gap:.6rem; align-items:center; padding:.65rem .9rem; border-radius:12px; color:var(--muted); transition:background .2s, color .2s}
+      .sidebar-link.active, .sidebar-link:hover{background:#e8f6ee; color:#065f46}
 
-        --primary: #2563eb;
-        --primary-hover: #1d4ed8;
-        --secondary-bg: #f3f4f6;
-        --secondary-hover: #e5e7eb;
-
-        --good: #16a34a;
-        --warn: #d97706;
-        --bad: #dc2626;
-        --info: #0ea5e9;
+      /* ======== COLAPSO (desktop) ======== */
+      /* quando o body tem .is-collapsed, a sidebar encolhe */
+      body.is-collapsed .sidebar {
+        width: 72px;
+      }
+      body.is-collapsed .sidebar .brand-text,
+      body.is-collapsed .sidebar .link-text,
+      body.is-collapsed .sidebar .logout-text {
+        display: none;
+      }
+      body.is-collapsed .sidebar .sidebar-link {
+        justify-content: center;
       }
 
-      body {
-        font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, 'Helvetica Neue', Arial, sans-serif;
-        background: var(--page-bg);
-        color: var(--text);
+      /* animações suaves */
+      .sidebar {
+        transition: width .2s ease, transform .25s ease;
       }
 
-      header.appbar {
-        position: sticky;
-        top: 0;
-        z-index: 40;
-        background: #fff;
-        border-bottom: 1px solid var(--card-border);
-        box-shadow: 0 1px 0 rgba(17, 24, 39, 0.04);
+      /* ======== MOBILE (drawer) ======== */
+      /* por padrão mobile: sidebar escondida e aparece como drawer */
+      @media (max-width: 767px) {
+        .sidebar {
+          position: fixed;
+          inset: 0 auto 0 0;
+          transform: translateX(-100%);
+          width: 260px;
+          background: #fff;
+          z-index: 60;
+          box-shadow: 0 10px 40px rgba(2,6,23,.2);
+        }
+        .sidebar.is-open {
+          transform: translateX(0);
+        }
+        .drawer-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(15, 23, 42, .45);
+          z-index: 50;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity .2s ease;
+        }
+        .drawer-overlay.is-open {
+          opacity: 1;
+          pointer-events: auto;
+        }
       }
-
-      .container {
-        max-width: 80rem;
-        margin: 0 auto;
-        padding-left: 1rem;
-        padding-right: 1rem;
-      }
-
-      .card {
-        background: var(--card-bg);
-        border: 1px solid var(--card-border);
-        border-radius: 12px;
-        box-shadow: var(--shadow);
-      }
-
-      .pill {
-        border-radius: 999px;
-        padding: 0.25rem 0.6rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-      }
-      .pill-blue { background: #e0eaff; color: #1d4ed8; }
-      .pill-green { background: #dcfce7; color: #166534; }
-      .pill-amber { background: #fef3c7; color: #92400e; }
-      .pill-red { background: #fee2e2; color: #991b1b; }
-      .pill-gray { background: #f3f4f6; color: #374151; }
-
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.6rem 1rem;
-        border-radius: 0.6rem;
-        font-weight: 600;
-        font-size: 0.9rem;
-        transition: filter 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-        border: 1px solid var(--card-border);
-      }
-      .btn:hover { filter: brightness(0.98); }
-      .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
-      .btn-primary:hover { background: var(--primary-hover); }
-      .btn-secondary { background: var(--secondary-bg); color: #111827; }
-      .btn-secondary:hover { background: var(--secondary-hover); }
-      .btn-danger { background: var(--bad); border-color: var(--bad); color: #fff; }
-      .btn-ghost { background: #fff; color: var(--text); }
-
-      .link { color: var(--primary); text-decoration: none; }
-      .link:hover { text-decoration: underline; }
-
-      input[type='text'],
-      input[type='number'],
-      input[type='date'],
-      input[type='time'],
-      input[type='email'],
-      input[type='password'],
-      textarea,
-      select {
-        background: #fff !important;
-        color: var(--text) !important;
-        border: 1px solid var(--card-border) !important;
-        border-radius: 0.5rem;
-        padding: 0.5rem 0.75rem;
-        outline: none;
-        box-shadow: none;
-      }
-      input:focus,
-      textarea:focus,
-      select:focus {
-        border-color: var(--primary) !important;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
-      }
-
-      table { width: 100%; border-collapse: collapse; }
-      th {
-        text-align: left;
-        font-weight: 600;
-        color: #374151;
-        padding: 0.75rem;
-        border-bottom: 1px solid var(--card-border);
-        background: #f9fafb;
-      }
-      td {
-        padding: 0.75rem;
-        border-bottom: 1px solid var(--card-border);
-        color: #111827;
-      }
-
-      hr { border: 0; border-top: 1px solid var(--card-border); }
-
-      .alert {
-        border-radius: 0.6rem;
-        padding: 0.6rem 0.9rem;
-        border: 1px solid;
-      }
-      .alert-success { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
-      .alert-error { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
-      .alert-info { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
     </style>
   </head>
-
-  <body>
-    <!-- Navbar (sobrescrevível) -->
+  <body class="min-h-full">
     {% block navbar %}
-    <header class="appbar">
-      <div class="container py-3 flex items-center justify-between">
-        <a href="/" class="flex items-center gap-2 text-lg font-semibold text-gray-900">
-          <i data-lucide="home" class="w-5 h-5"></i>
-          CondoX
-        </a>
+    <!-- Layout com sidebar -->
+    <div class="flex min-h-screen">
+      <!-- Overlay para mobile -->
+      <div id="drawerOverlay" class="drawer-overlay md:hidden"></div>
 
-        <nav class="flex items-center gap-4 text-sm">
-          <a href="/reservas/areas/" class="link flex items-center gap-1"><i data-lucide="calendar" class="w-4 h-4"></i> Reservas</a>
-          <a href="/eventos/" class="link flex items-center gap-1"><i data-lucide="calendar-days" class="w-4 h-4"></i> Eventos</a>
-          <a href="/admin/" class="link flex items-center gap-1"><i data-lucide="settings" class="w-4 h-4"></i> Admin</a>
-
+      <!-- Sidebar -->
+      <aside id="sidebar" class="sidebar w-[250px] hidden md:flex md:flex-col border-r border-[var(--line)] bg-white">
+        <div class="p-4 border-b border-[var(--line)] flex items-center gap-2">
+          <img src="https://img.icons8.com/fluency/48/checked.png" class="w-6 h-6" alt="">
+          <span class="font-semibold brand-text">CondoX</span>
+        </div>
+        <nav class="p-3 space-y-1">
+          <a href="/" class="sidebar-link {% if request.path == '/' %}active{% endif %}">
+            <i data-lucide="home" class="w-4 h-4"></i> <span class="link-text">Home</span>
+          </a>
+          <a href="/reservas/areas/" class="sidebar-link">
+            <i data-lucide="calendar" class="w-4 h-4"></i> <span class="link-text">Reservas</span>
+          </a>
+          <a href="{% url 'financeiro:minhas_cobrancas' %}" class="sidebar-link">
+            <i data-lucide="wallet" class="w-4 h-4"></i> <span class="link-text">Financeiro</span>
+          </a>
+          <a href="/assembleias/" class="sidebar-link">
+            <i data-lucide="land-plot" class="w-4 h-4"></i> <span class="link-text">Assembleias</span>
+          </a>
+          <a href="/admin/" class="sidebar-link">
+            <i data-lucide="settings" class="w-4 h-4"></i> <span class="link-text">Admin</span>
+          </a>
+        </nav>
+        <div class="mt-auto p-3 border-t border-[var(--line)]">
           {% if user.is_authenticated %}
-            <span class="hidden sm:inline text-gray-600">Olá, {{ user.first_name|default:user.username }}!</span>
-            <form method="post" action="{% url 'logout' %}" class="inline">
-              {% csrf_token %}
-              <button class="btn btn-secondary" type="submit"><i data-lucide="log-out" class="w-4 h-4"></i> Sair</button>
+            <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+              <button class="btn w-full">
+                <i data-lucide="log-out" class="w-4 h-4"></i> <span class="logout-text">Sair</span>
+              </button>
             </form>
           {% else %}
-            <a href="/accounts/login/" class="btn btn-primary"><i data-lucide="log-in" class="w-4 h-4"></i> Entrar</a>
+            <a class="btn btn-primary w-full" href="/accounts/login/">
+              <i data-lucide="log-in" class="w-4 h-4"></i> <span class="logout-text">Entrar</span>
+            </a>
           {% endif %}
-        </nav>
-      </div>
-    </header>
-    {% endblock navbar %}
+        </div>
+      </aside>
 
-    <!-- Mensagens -->
-    {% if messages %}
-      <div class="container pt-4">
-        {% for message in messages %}
-          <div class="mb-2 alert
-        {% if message.tags == 'success' %}alert-success{% endif %}
-        {% if message.tags == 'error' %}alert-error{% endif %}
-        {% if message.tags == 'info' or message.tags == 'warning' %}alert-info{% endif %}">{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
+      <!-- Conteúdo -->
+      <div class="flex-1 min-w-0">
+        <!-- Topbar -->
+        <header class="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-[var(--line)]">
+          <div class="px-4 md:px-8 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <!-- Botão: abre drawer no mobile / colapsa no desktop -->
+              <button id="sidebarToggle"
+                      class="btn"
+                      type="button"
+                      aria-label="Alternar menu">
+                <i data-lucide="menu" class="w-4 h-4"></i>
+              </button>
 
-    <!-- Conteúdo -->
-    <main id="conteudo" class="container py-6">
-      {% block content %}{% endblock %}
-    </main>
+              <!-- Busca (desktop) -->
+              <div class="hidden md:flex pill-input w-[420px]">
+                <input class="w-full" type="text" placeholder="Pesquisar CPF/CNPJ, reservas, unidades..." />
+                <button class="btn-primary btn px-4" type="button">
+                  <i data-lucide="search" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
 
-    <!-- Rodapé (sobrescrevível) -->
-    {% block footer %}
-    <footer class="border-t bg-white mt-10">
-      <div class="container py-4 text-sm text-gray-500">
-        CondoX © 2025
+            <div class="flex items-center gap-2">
+              <span class="hidden sm:inline chip">Olá, {{ user.first_name|default:user.username|default:'Visitante' }}</span>
+              <img class="w-8 h-8 rounded-full ring-2 ring-[var(--line)]" src="https://api.dicebear.com/9.x/identicon/svg?seed={{ user.username|default:'x' }}" alt="">
+            </div>
+          </div>
+        </header>
+
+        <!-- Mensagens -->
+        {% if messages %}
+          <div class="px-4 md:px-8 pt-4 space-y-2">
+            {% for message in messages %}
+              <div class="card px-4 py-3 text-sm {% if message.tags == 'success' %}text-green-700 bg-green-50 border-green-200{% elif message.tags == 'error' %}text-red-700 bg-red-50 border-red-200{% else %}text-slate-700{% endif %}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <!-- Página -->
+        <main id="conteudo" class="px-4 md:px-8 py-6">
+          {% block content %}{% endblock %}
+        </main>
       </div>
-    </footer>
-    {% endblock footer %}
+    </div>
+    {% endblock %}
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
-        if (window.lucide) window.lucide.createIcons()
-      })
+        if (window.lucide) lucide.createIcons();
+
+        const btn = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('drawerOverlay');
+
+        const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
+
+        // abre/fecha no mobile; colapsa/expande no desktop
+        const toggleSidebar = () => {
+          if (isMobile()) {
+            sidebar.classList.toggle('is-open');
+            overlay.classList.toggle('is-open');
+          } else {
+            document.body.classList.toggle('is-collapsed');
+          }
+        };
+
+        btn.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        // garante que ao redimensionar, estados não fiquem travados
+        window.addEventListener('resize', () => {
+          if (!isMobile()) {
+            sidebar.classList.remove('is-open');
+            overlay.classList.remove('is-open');
+          }
+        });
+      });
     </script>
   </body>
 </html>
