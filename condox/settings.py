@@ -105,71 +105,136 @@ AUTH_USER_MODEL = "accounts.User"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
 
-# 🎨 Jazzmin (ADMIN claro)
+# 🎨 Jazzmin (ADMIN moderno)
 JAZZMIN_SETTINGS = {
-    "site_title": "CondoX — Administração",
+    "site_title": "CondoX • Administração",
     "site_header": "CondoX",
     "site_brand": "CondoX",
-    "welcome_sign": "Bem-vindo(a) ao painel do CondoX",
-    "copyright": "CondoX © 2025",
+    "site_logo": None,
+    "login_logo": None,
+    "login_logo_dark": None,
+    "site_logo_classes": "img-circle",
+    "site_icon": None,
+    "welcome_sign": "Bem-vindo ao painel administrativo do CondoX",
+    "copyright": "CondoX © 2025 • Sistema de Gestão Condominial",
     "search_model": ["accounts.User", "reservas.Reserva", "financeiro.Lancamento"],
-    "show_ui_builder": False,
-
-    # Links no topo
+    "user_avatar": None,
+    
+    # Top navigation
     "topmenu_links": [
-        {"name": "Portal", "url": "/", "new_window": False},
-        {"app": "reservas"},
-        {"app": "financeiro"},
-        {"app": "comunicados"},
+        {"name": "🏠 Portal", "url": "/", "new_window": False, "permissions": ["auth.view_user"]},
+        {"name": "📊 Dashboard", "url": "/admin/", "new_window": False},
+        {"app": "reservas", "name": "📅 Reservas"},
+        {"app": "financeiro", "name": "💰 Financeiro"},
+        {"app": "comunicados", "name": "📢 Comunicados"},
+        {"name": "⚙️ Configurações", "url": "/admin/auth/group/", "new_window": False, "permissions": ["auth.change_group"]},
     ],
 
-    # Ícones das models (sem votações)
-    "icons": {
-        # Accounts
-        "accounts.User": "fas fa-user",
-        # Reservas
-        "reservas.AreaReservavel": "fas fa-map-pin",
-        "reservas.Reserva": "fas fa-calendar-check",
-        # Financeiro
-        "financeiro.Lancamento": "fas fa-wallet",
-        # Comunicados
-        "comunicados.Aviso": "fas fa-bullhorn",
-        # Condomínios
-        "condominios.Condominio": "fas fa-building",
-        "condominios.Bloco": "fas fa-cubes",
-        "condominios.Unidade": "fas fa-door-closed",
-        # Galeria
-        "galeria.Evento": "fas fa-camera-retro",
-    },
+    # User menu on the top right
+    "usermenu_links": [
+        {"name": "Dashboard", "url": "/", "icon": "fas fa-tachometer-alt"},
+        {"model": "auth.user"}
+    ],
 
+    # Side navigation
     "show_sidebar": True,
     "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
     "order_with_respect_to": [
         "reservas",
-        "financeiro",
+        "financeiro", 
         "comunicados",
         "condominios",
+        "galeria",
+        "assembleias",
         "accounts",
+        "auth",
     ],
 
+    # Icons for models - Ícones modernos e consistentes
+    "icons": {
+        # Accounts & Auth
+        "accounts.User": "fas fa-user-circle",
+        "auth.User": "fas fa-users",
+        "auth.Group": "fas fa-users-cog",
+        
+        # Reservas - Ícones relacionados a agendamento
+        "reservas.AreaReservavel": "fas fa-map-marked-alt",
+        "reservas.Reserva": "fas fa-calendar-check",
+        
+        # Financeiro - Ícones relacionados a dinheiro
+        "financeiro.Lancamento": "fas fa-file-invoice-dollar",
+        
+        # Comunicados - Ícones de comunicação
+        "comunicados.Aviso": "fas fa-bullhorn",
+        
+        # Condomínios - Ícones relacionados a estrutura
+        "condominios.Condominio": "fas fa-building",
+        "condominios.Bloco": "fas fa-cubes",
+        "condominios.Unidade": "fas fa-door-open",
+        
+        # Galeria - Ícones relacionados a eventos
+        "galeria.Evento": "fas fa-images",
+        
+        # Assembleias - Ícones relacionados a reuniões
+        "assembleias.Assembleia": "fas fa-gavel",
+        "assembleias.Pauta": "fas fa-list-check",
+        
+        # Votações - Ícones relacionados a votação
+        "votacoes.Pauta": "fas fa-vote-yea",
+        "votacoes.Voto": "fas fa-hand-paper",
+    },
+
+    # Related modal behavior
+    "related_modal_active": False,
+
+    # Custom CSS & JS
+    "custom_css": "css/admin_premium.css",
+    "custom_js": None,
+    
+    # Use modals instead of popups
+    "use_google_fonts_cdn": True,
+    
+    # Show the UI customizer on the sidebar
+    "show_ui_builder": False,
+
+    # Change form format
     "changeform_format": "horizontal_tabs",
-
-    # 👉 Tema CLARO
-    "theme": "flatly",
-
-    # CSS próprio para ajustes finos do admin
-    "custom_css": "css/admin_overrides.css",
+    "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
+    
+    # List per page options
+    "list_filter_horizontal": True,
+    
+    # Add language chooser to top menu
+    "language_chooser": False,
 }
 
-# Ajustes finos de UI do Jazzmin para tema claro
+# Ajustes finos de UI do Jazzmin - Tema moderno e elegante
 JAZZMIN_UI_TWEAKS = {
-    "navbar": "navbar-white navbar-light",
-    "sidebar": "sidebar-light-primary",
+    "navbar": "navbar-dark navbar-primary",
+    "sidebar": "sidebar-dark-primary",
+    "brand_colour": "navbar-primary",
     "accent": "accent-primary",
-    "no_navbar_border": False,
     "navbar_small_text": False,
-    "sidebar_nav_small_text": False,
     "footer_small_text": True,
+    "sidebar_nav_small_text": False,
+    "sidebar_nav_flat_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": True,
+    "theme": "lux",  # Tema Bootstrap elegante
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary", 
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    },
+    "actions_sticky_top": False
 }
 
 # Emails aparecem no terminal (modo dev)
