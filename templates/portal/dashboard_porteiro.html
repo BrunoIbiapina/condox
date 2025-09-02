@@ -1,81 +1,152 @@
-{% extends 'base.html' %}
+{% extends 'base_porteiro.html' %}
 {% block title %}Porteiro • CondoX{% endblock %}
 {% block content %}
 
 <header class="mb-6">
-  <div class="flex items-center justify-between gap-3">
-    <h1 class="text-2xl font-semibold tracking-tight flex items-center gap-2">
-      <i data-lucide="badge-check" class="w-6 h-6"></i>
-      Painel do Porteiro
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <h1 class="text-3xl font-bold tracking-tight flex items-center gap-3">
+      <div class="bg-blue-100 p-2 rounded-lg">
+        <i data-lucide="shield" class="w-7 h-7 text-blue-600"></i>
+      </div>
+      Controle de Acesso
     </h1>
-    <span class="text-sm text-gray-500">Agora: {{ agora|date:"d/m/Y H:i" }}</span>
+    <div class="flex items-center gap-2">
+      <span class="pill pill-online">
+        <i data-lucide="wifi" class="w-3 h-3"></i>
+        Online
+      </span>
+      <span class="chip current-time">{{ agora|date:"H:i:s" }}</span>
+    </div>
   </div>
-  <p class="text-gray-500 text-sm mt-2">Agenda do dia por horário e área.</p>
+  <p class="text-gray-600 text-lg mt-3">Monitor de reservas e áreas em tempo real.</p>
 </header>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-  <!-- Agenda do dia (2/3) -->
-  <section class="lg:col-span-2 card p-5">
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+  <!-- Em uso agora -->
+  <section class="card p-6">
     <div class="flex items-center justify-between mb-4">
-      <h2 class="font-semibold text-lg flex items-center gap-2">
-        <i data-lucide="calendar-days" class="w-5 h-5"></i>
-        Reservas de hoje
+      <h2 class="font-bold text-xl flex items-center gap-3">
+        <div class="bg-green-100 p-2 rounded-lg">
+          <i data-lucide="activity" class="w-5 h-5 text-green-600"></i>
+        </div>
+        Em Uso Agora
       </h2>
+      <span class="pill pill-online">
+        {{ em_uso_agora|length }} ativa{{ em_uso_agora|length|pluralize }}
+      </span>
     </div>
 
     <ul class="divide-y divide-gray-200">
-      {% for r in reservas_hoje %}
-        <li class="py-3 flex items-center justify-between">
-          <div class="min-w-0">
-            <div class="font-medium truncate">{{ r.area.nome }}</div>
-            <div class="text-gray-600 text-sm mt-0.5">
-              {{ r.inicio|date:"H:i" }} – {{ r.fim|date:"H:i" }} • {{ r.morador.get_full_name|default:r.morador.username }}
+      {% for r in em_uso_agora %}
+        <li class="py-4 flex items-center justify-between gap-4">
+          <div class="min-w-0 flex-1">
+            <div class="font-semibold text-lg truncate text-gray-900">
+              {{ r.area.nome }}
+              {% if r.area.condominio %}
+                <span class="text-gray-500 font-normal"> • {{ r.area.condominio.nome }}</span>
+              {% endif %}
+            </div>
+            <div class="text-gray-600 mt-1 flex items-center gap-4">
+              <span class="flex items-center gap-1">
+                <i data-lucide="clock" class="w-4 h-4"></i>
+                {{ r.inicio|date:"H:i" }}–{{ r.fim|date:"H:i" }}
+              </span>
+              {% if r.morador %}
+                <span class="flex items-center gap-1">
+                  <i data-lucide="user" class="w-4 h-4"></i>
+                  {{ r.morador.get_full_name|default:r.morador.username }}
+                </span>
+              {% endif %}
             </div>
           </div>
-
-          <span class="pill
-            {% if r.inicio <= agora and r.fim > agora %}
-              bg-green-100 text-green-700
-            {% elif r.status == 'APROVADA' %}
-              bg-blue-100 text-blue-700
-            {% elif r.status == 'PENDENTE' %}
-              bg-amber-100 text-amber-700
-            {% else %}
-              bg-gray-100 text-gray-700
-            {% endif %}">
-            {% if r.inicio <= agora and r.fim > agora %}EM USO{% else %}{{ r.get_status_display }}{% endif %}
+          <span class="pill pill-em-uso">
+            <i data-lucide="circle" class="w-3 h-3 fill-current"></i>
+            Em Uso
           </span>
         </li>
       {% empty %}
-        <li class="py-8 text-sm text-gray-500 text-center">Sem reservas para hoje.</li>
+        <li class="py-12 text-center">
+          <div class="text-gray-400 mb-2">
+            <i data-lucide="calendar-x" class="w-12 h-12 mx-auto"></i>
+          </div>
+          <p class="text-gray-500">Nenhuma área em uso no momento.</p>
+        </li>
       {% endfor %}
     </ul>
   </section>
 
-  <!-- Acesso rápido (1/3) -->
-  <aside class="space-y-5">
-    <a href="/reservas/areas/" class="card p-5 hover:bg-gray-50 transition flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <i data-lucide="calendar-search" class="w-6 h-6 text-blue-600"></i>
-        <div>
-          <div class="font-semibold">Consultar disponibilidade</div>
-          <div class="text-xs text-gray-500">Ver áreas e horários</div>
+  <!-- Reservas de hoje -->
+  <section class="card p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-bold text-xl flex items-center gap-3">
+        <div class="bg-blue-100 p-2 rounded-lg">
+          <i data-lucide="calendar-days" class="w-5 h-5 text-blue-600"></i>
         </div>
-      </div>
-      <i data-lucide="arrow-right" class="w-4 h-4 text-gray-400"></i>
-    </a>
+        Agenda de Hoje
+      </h2>
+      <span class="pill pill-aprovada">
+        {{ reservas_hoje|length }} reserva{{ reservas_hoje|length|pluralize }}
+      </span>
+    </div>
 
-    <a href="/admin/reservas/reserva/" class="card p-5 hover:bg-gray-50 transition flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <i data-lucide="notebook-pen" class="w-6 h-6 text-emerald-600"></i>
-        <div>
-          <div class="font-semibold">Gerenciar reservas</div>
-          <div class="text-xs text-gray-500">Criar/editar/cancelar</div>
-        </div>
-      </div>
-      <i data-lucide="arrow-right" class="w-4 h-4 text-gray-400"></i>
-    </a>
-  </aside>
+    <ul class="divide-y divide-gray-200">
+      {% for r in reservas_hoje %}
+        <li class="py-4 flex items-center justify-between gap-4">
+          <div class="min-w-0 flex-1">
+            <div class="font-semibold text-lg truncate text-gray-900">
+              {{ r.area.nome }}
+              {% if r.area.condominio %}
+                <span class="text-gray-500 font-normal"> • {{ r.area.condominio.nome }}</span>
+              {% endif %}
+            </div>
+            <div class="text-gray-600 mt-1 flex items-center gap-4">
+              <span class="flex items-center gap-1">
+                <i data-lucide="clock" class="w-4 h-4"></i>
+                {{ r.inicio|date:"H:i" }}–{{ r.fim|date:"H:i" }}
+              </span>
+              {% if r.morador %}
+                <span class="flex items-center gap-1">
+                  <i data-lucide="user" class="w-4 h-4"></i>
+                  {{ r.morador.get_full_name|default:r.morador.username }}
+                </span>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if r.inicio <= agora and r.fim > agora %}
+            <span class="pill pill-em-uso">
+              <i data-lucide="circle" class="w-3 h-3 fill-current"></i>
+              Em Uso
+            </span>
+          {% elif r.status == 'APROVADA' %}
+            <span class="pill pill-aprovada">
+              <i data-lucide="check-circle" class="w-3 h-3"></i>
+              Aprovada
+            </span>
+          {% elif r.status == 'PENDENTE' %}
+            <span class="pill pill-pendente">
+              <i data-lucide="clock" class="w-3 h-3"></i>
+              Pendente
+            </span>
+          {% elif r.status == 'CANCELADA' %}
+            <span class="pill pill-cancelada">
+              <i data-lucide="x-circle" class="w-3 h-3"></i>
+              Cancelada
+            </span>
+          {% else %}
+            <span class="pill pill-cancelada">{{ r.get_status_display }}</span>
+          {% endif %}
+        </li>
+      {% empty %}
+        <li class="py-12 text-center">
+          <div class="text-gray-400 mb-2">
+            <i data-lucide="calendar-x" class="w-12 h-12 mx-auto"></i>
+          </div>
+          <p class="text-gray-500">Nenhuma reserva programada para hoje.</p>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
 </div>
 
 {% endblock %}

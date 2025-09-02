@@ -1,4 +1,4 @@
-# condox/urls.py  (completo)
+# condox/urls.py
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -8,16 +8,13 @@ from portal import views as portal_views
 urlpatterns = [
     path("admin/", admin.site.urls),
 
-    # Auth
+    # LOGIN/LOGOUT (se já usa auth padrão)
     path("accounts/", include("django.contrib.auth.urls")),
 
-    # Home que decide o painel por papel (GESTOR / MORADOR / PORTEIRO)
+    # >>> Home única que escolhe o dashboard por papel <<<
     path("", portal_views.home, name="home"),
 
-    # 🔧 Rota extra só para acabar com o NoReverseMatch em {% url 'dashboard' %}
-    path("dashboard/", portal_views.dashboard, name="dashboard"),
-
-    # Apps
+    # apps
     path("portal/", include(("portal.urls", "portal"), namespace="portal")),
     path("reservas/", include(("reservas.urls", "reservas"), namespace="reservas")),
     path("eventos/", include(("galeria.urls", "galeria"), namespace="galeria")),

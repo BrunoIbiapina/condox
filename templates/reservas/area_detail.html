@@ -12,7 +12,10 @@
   </div>
   <p class="text-gray-500 text-sm mt-2">
     Disponibilidade para <strong>{{ dia|date:"d/m/Y" }}</strong>.
-    {% if is_hoje %}<span class="pill bg-green-100 text-green-700 ml-2">Hoje</span>{% endif %}
+    {% if is_hoje %}<span class="pill pill-em-uso ml-2">
+      <i data-lucide="calendar" class="w-3 h-3"></i>
+      Hoje
+    </span>{% endif %}
   </p>
 </header>
 
@@ -56,8 +59,14 @@
     <button class="btn"><i data-lucide="search" class="w-4 h-4"></i> Ver</button>
 
     <div class="ml-auto flex items-center gap-3 text-xs text-gray-500">
-      <span class="pill bg-blue-100 text-blue-700">Disponível</span>
-      <span class="pill bg-gray-100 text-gray-700">Passado</span>
+      <span class="pill pill-aprovada">
+        <i data-lucide="check-circle" class="w-3 h-3"></i>
+        Disponível
+      </span>
+      <span class="pill pill-cancelada">
+        <i data-lucide="clock" class="w-3 h-3"></i>
+        Passado
+      </span>
     </div>
   </div>
 </form>
@@ -75,7 +84,10 @@
           {% if is_hoje and inicio_str <= now_str %}
             <div class="w-full text-left card px-3 py-2 opacity-60 pointer-events-none flex items-center justify-between">
               <span>{{ s.0|date:"H:i" }} – {{ s.1|date:"H:i" }}</span>
-              <span class="pill bg-gray-100 text-gray-700">Passado</span>
+              <span class="pill pill-cancelada">
+                <i data-lucide="clock" class="w-3 h-3"></i>
+                Passado
+              </span>
             </div>
           {% else %}
             {% if pode_reservar %}
@@ -86,13 +98,19 @@
                 <input type="hidden" name="fim" value="{{ s.1|date:'c' }}">
                 <button class="w-full text-left card px-3 py-2 hover:bg-blue-50 transition flex items-center justify-between">
                   <span>{{ s.0|date:"H:i" }} – {{ s.1|date:"H:i" }}</span>
-                  <span class="pill bg-blue-100 text-blue-700">Reservar</span>
+                  <span class="pill pill-aprovada">
+                    <i data-lucide="calendar-plus" class="w-3 h-3"></i>
+                    Reservar
+                  </span>
                 </button>
               </form>
             {% else %}
               <div class="w-full text-left card px-3 py-2 flex items-center justify-between cursor-not-allowed" title="Porteiro apenas visualiza">
                 <span>{{ s.0|date:"H:i" }} – {{ s.1|date:"H:i" }}</span>
-                <span class="pill bg-gray-100 text-gray-700">Somente visualização</span>
+                <span class="pill pill-cancelada">
+                  <i data-lucide="eye" class="w-3 h-3"></i>
+                  Somente visualização
+                </span>
               </div>
             {% endif %}
           {% endif %}

@@ -1,15 +1,166 @@
 {% extends "admin/base.html" %}
 {% load static %}
 
-{% block title %}CondoX Admin | {% endblock %}
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | CondoX Admin{% endblock %}
 
 {% block branding %}
 <h1 id="site-name">
-  <a href="{% url 'admin:index' %}">CondoX — Administração</a>
+  <a href="{% url 'admin:index' %}" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+    <i data-lucide="building-2" style="width: 24px; height: 24px;"></i>
+    <span>CondoX</span>
+    <small style="color: #64748b; font-weight: normal;">• Admin</small>
+  </a>
 </h1>
 {% endblock %}
 
 {% block extrastyle %}
 {{ block.super }}
 <link rel="stylesheet" href="{% static 'admin/custom.css' %}">
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<!-- Tailwind CSS para consistência -->
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+/* Integração com o sistema base */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+/* Header customizado */
+#header {
+  background: white !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+#branding h1 a {
+  color: #1e293b !important;
+  font-weight: 600 !important;
+  font-size: 1.5rem !important;
+}
+
+#user-tools a {
+  color: #22c55e !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+}
+
+#user-tools a:hover {
+  background: rgba(34, 197, 94, 0.1) !important;
+  color: #16a34a !important;
+}
+
+/* Container principal */
+#content {
+  background: #f8fafc !important;
+  min-height: calc(100vh - 80px) !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 2rem !important;
+  box-sizing: border-box !important;
+}
+
+/* Apps list styling */
+.dashboard #content {
+  padding: 2rem !important;
+}
+
+.dashboard .module {
+  background: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+  margin-bottom: 2rem !important;
+  max-width: 1200px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.dashboard .module h2 {
+  background: #f8fafc !important;
+  color: #1e293b !important;
+  font-weight: 600 !important;
+  padding: 1rem 1.5rem !important;
+  margin: 0 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+.dashboard .module table {
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.dashboard .module td {
+  padding: 1rem 1.5rem !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.dashboard .module td:last-child {
+  border-bottom: none !important;
+}
+
+.dashboard .module a {
+  color: #1e293b !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.dashboard .module a:hover {
+  color: #22c55e !important;
+  padding-left: 0.5rem !important;
+}
+
+/* Ações recentes */
+#content-related .module {
+  background: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+  max-width: 1200px !important;
+  margin: 2rem auto !important;
+}
+
+#content-related .module h2 {
+  background: #f8fafc !important;
+  color: #1e293b !important;
+  font-weight: 600 !important;
+  padding: 1rem 1.5rem !important;
+  margin: 0 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+/* Container para centralizar */
+#main {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#content-main {
+  width: 100% !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+}
+</style>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<meta name="description" content="CondoX - Sistema de Gestão Condominial">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+<script>
+// Inicializar Lucide icons
+if (typeof lucide !== 'undefined') {
+  lucide.createIcons();
+}
+</script>
 {% endblock %}
