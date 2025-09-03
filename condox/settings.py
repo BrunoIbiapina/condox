@@ -18,24 +18,29 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
 
-# DEBUG: 1/true/True habilita; default True em dev local
-DEBUG = os.getenv("DEBUG", "1").lower() in ("1", "true", "yes", "on")
+# Em produção: defina DEBUG=false no Railway
+DEBUG = os.getenv("DEBUG", "0").lower() in ("1", "true", "yes", "on")
 
-# Hosts permitidos
+# Hosts permitidos (ajuste no Railway)
 # Ex.: ALLOWED_HOSTS=condox-production.up.railway.app,localhost,127.0.0.1
 ALLOWED_HOSTS = [
     h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()
 ]
 
-# CSRF (precisa do esquema https://)
-# Ex.: CSRF_TRUSTED_ORIGINS=https://condox-production.up.railway.app,https://localhost
+# CSRF (precisa https://)
+# Ex.: CSRF_TRUSTED_ORIGINS=https://condox-production.up.railway.app
 CSRF_TRUSTED_ORIGINS = [
-    o.strip() for o in os.getenv("CSRF_TRUSTED_ORIGINS", "https://localhost,https://127.0.0.1").split(",") if o.strip()
+    o.strip()
+    for o in os.getenv("CSRF_TRUSTED_ORIGINS", "https://localhost,https://127.0.0.1").split(",")
+    if o.strip()
 ]
 
 INSTALLED_APPS = [
     # Jazzmin antes do admin
     "jazzmin",
+
+    # WhiteNoise: usar o runserver sem servir estáticos nativos
+    "whitenoise.runserver_nostatic",
 
     # Django core
     "django.contrib.admin",
@@ -45,7 +50,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # 3rd party
+    # 3rd
     "rest_framework",
     "django_filters",
 
@@ -62,6 +67,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # WhiteNoise logo após SecurityMiddleware
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -92,8 +100,6 @@ WSGI_APPLICATION = "condox.wsgi.application"
 
 # ===========================
 # Banco de Dados
-# - Em dev: SQLite
-# - Em Railway: Postgres via envs PG/POSTGRES
 # ===========================
 if os.getenv("PGHOST") or os.getenv("POSTGRES_DB"):
     DATABASES = {
@@ -119,15 +125,13 @@ else:
 # ===========================
 # Segurança / Proxy (Railway)
 # ===========================
-# Faz o Django respeitar X-Forwarded-Proto (https) do proxy
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 
-# Cookies seguros em produção
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    # Opcional endurecimento extra:
+    # Opcional:
     # SECURE_HSTS_SECONDS = 31536000
     # SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     # SECURE_HSTS_PRELOAD = True
@@ -153,11 +157,13 @@ USE_TZ = True
 
 # ===========================
 # Arquivos estáticos / mídia
-# Em produção real, recomendo usar Whitenoise + collectstatic.
 # ===========================
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATICFILES_DIRS = [BASE_DIR / "static"]  # se tiver assets próprios
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# WhiteNoise: versões gzip/brotli com hash (cache busting)
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -269,13 +275,4 @@ JAZZMIN_UI_TWEAKS = {
 # ===========================
 # Email
 # ===========================
-# Em dev:
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-# Futuro (Gmail):
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-# EMAIL_HOST = "smtp.gmail.com"
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = "seuemail@gmail.com"
-# EMAIL_HOST_PASSWORD = "sua_senha_de_app"
-# DEFAULT_FROM_EMAIL = "CondoX <seuemail@gmail.com>"
