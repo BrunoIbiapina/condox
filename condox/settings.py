@@ -2,15 +2,39 @@
 from pathlib import Path
 import os
 
+# =========================
+# Integração n8n (webhooks)
+# =========================
+N8N_WEBHOOK_URL = os.getenv(
+    "N8N_WEBHOOK_URL",
+    "https://brunoibiapina.app.n8n.cloud/webhook-test/da085699-19d2-4fe0-86d1-23f4b3c9d91b",
+)
+N8N_WEBHOOK_TOKEN = os.getenv("N8N_WEBHOOK_TOKEN", "")
+
+# =========
+# Básico
+# =========
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ⚠️ Em produção use variável de ambiente
-SECRET_KEY = "dev-secret-key"
-DEBUG = True
-ALLOWED_HOSTS = []
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
+
+# DEBUG: 1/true/True habilita; default True em dev local
+DEBUG = os.getenv("DEBUG", "1").lower() in ("1", "true", "yes", "on")
+
+# Hosts permitidos
+# Ex.: ALLOWED_HOSTS=condox-production.up.railway.app,localhost,127.0.0.1
+ALLOWED_HOSTS = [
+    h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()
+]
+
+# CSRF (precisa do esquema https://)
+# Ex.: CSRF_TRUSTED_ORIGINS=https://condox-production.up.railway.app,https://localhost
+CSRF_TRUSTED_ORIGINS = [
+    o.strip() for o in os.getenv("CSRF_TRUSTED_ORIGINS", "https://localhost,https://127.0.0.1").split(",") if o.strip()
+]
 
 INSTALLED_APPS = [
-    # Jazzmin deve vir ANTES do admin
+    # Jazzmin antes do admin
     "jazzmin",
 
     # Django core
@@ -25,7 +49,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
 
-    # apps do projeto
+    # Apps do projeto
     "accounts.apps.AccountsConfig",
     "condominios",
     "reservas",
@@ -51,7 +75,7 @@ ROOT_URLCONF = "condox.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],  # sobrescrever admin/index.html etc.
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -66,15 +90,52 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "condox.wsgi.application"
 
-# Banco de dados (dev)
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# ===========================
+# Banco de Dados
+# - Em dev: SQLite
+# - Em Railway: Postgres via envs PG/POSTGRES
+# ===========================
+if os.getenv("PGHOST") or os.getenv("POSTGRES_DB"):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("POSTGRES_DB", os.getenv("PGDATABASE", "railway")),
+            "USER": os.getenv("POSTGRES_USER", os.getenv("PGUSER", "postgres")),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD", os.getenv("PGPASSWORD", "")),
+            "HOST": os.getenv("PGHOST", "localhost"),
+            "PORT": os.getenv("PGPORT", "5432"),
+            "CONN_MAX_AGE": 60,
+            "OPTIONS": {"sslmode": os.getenv("PGSSLMODE", "require")},
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
+# ===========================
+# Segurança / Proxy (Railway)
+# ===========================
+# Faz o Django respeitar X-Forwarded-Proto (https) do proxy
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+
+# Cookies seguros em produção
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # Opcional endurecimento extra:
+    # SECURE_HSTS_SECONDS = 31536000
+    # SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    # SECURE_HSTS_PRELOAD = True
+    # SECURE_SSL_REDIRECT = True
+
+# ===========================
 # Validações de senha
+# ===========================
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -82,30 +143,37 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# ===========================
 # Localização
+# ===========================
 LANGUAGE_CODE = "pt-br"
 TIME_ZONE = "America/Fortaleza"
 USE_I18N = True
 USE_TZ = True
 
-# Arquivos estáticos e mídia
+# ===========================
+# Arquivos estáticos / mídia
+# Em produção real, recomendo usar Whitenoise + collectstatic.
+# ===========================
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]  # seus CSS/JS do projeto
-STATIC_ROOT = BASE_DIR / "staticfiles"    # destino do collectstatic
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"           # uploads
+MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Usuário custom
+# ===========================
+# Usuário custom & auth
+# ===========================
 AUTH_USER_MODEL = "accounts.User"
-
-# Login/logout
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
 
-# 🎨 Jazzmin (ADMIN moderno)
+# ===========================
+# Jazzmin (Admin)
+# ===========================
 JAZZMIN_SETTINGS = {
     "site_title": "CondoX • Administração",
     "site_header": "CondoX",
@@ -119,8 +187,6 @@ JAZZMIN_SETTINGS = {
     "copyright": "CondoX © 2025 • Sistema de Gestão Condominial",
     "search_model": ["accounts.User", "reservas.Reserva", "financeiro.Lancamento"],
     "user_avatar": None,
-    
-    # Top navigation
     "topmenu_links": [
         {"name": "🏠 Portal", "url": "/", "new_window": False, "permissions": ["auth.view_user"]},
         {"name": "📊 Dashboard", "url": "/admin/", "new_window": False},
@@ -129,21 +195,17 @@ JAZZMIN_SETTINGS = {
         {"app": "comunicados", "name": "📢 Comunicados"},
         {"name": "⚙️ Configurações", "url": "/admin/auth/group/", "new_window": False, "permissions": ["auth.change_group"]},
     ],
-
-    # User menu on the top right
     "usermenu_links": [
         {"name": "Dashboard", "url": "/", "icon": "fas fa-tachometer-alt"},
         {"model": "auth.user"}
     ],
-
-    # Side navigation
     "show_sidebar": True,
     "navigation_expanded": True,
     "hide_apps": [],
     "hide_models": [],
     "order_with_respect_to": [
         "reservas",
-        "financeiro", 
+        "financeiro",
         "comunicados",
         "condominios",
         "galeria",
@@ -151,66 +213,33 @@ JAZZMIN_SETTINGS = {
         "accounts",
         "auth",
     ],
-
-    # Icons for models - Ícones modernos e consistentes
     "icons": {
-        # Accounts & Auth
         "accounts.User": "fas fa-user-circle",
         "auth.User": "fas fa-users",
         "auth.Group": "fas fa-users-cog",
-        
-        # Reservas - Ícones relacionados a agendamento
         "reservas.AreaReservavel": "fas fa-map-marked-alt",
         "reservas.Reserva": "fas fa-calendar-check",
-        
-        # Financeiro - Ícones relacionados a dinheiro
         "financeiro.Lancamento": "fas fa-file-invoice-dollar",
-        
-        # Comunicados - Ícones de comunicação
         "comunicados.Aviso": "fas fa-bullhorn",
-        
-        # Condomínios - Ícones relacionados a estrutura
         "condominios.Condominio": "fas fa-building",
         "condominios.Bloco": "fas fa-cubes",
         "condominios.Unidade": "fas fa-door-open",
-        
-        # Galeria - Ícones relacionados a eventos
         "galeria.Evento": "fas fa-images",
-        
-        # Assembleias - Ícones relacionados a reuniões
         "assembleias.Assembleia": "fas fa-gavel",
         "assembleias.Pauta": "fas fa-list-check",
-        
-        # Votações - Ícones relacionados a votação
         "votacoes.Pauta": "fas fa-vote-yea",
         "votacoes.Voto": "fas fa-hand-paper",
     },
-
-    # Related modal behavior
     "related_modal_active": False,
-
-    # Custom CSS & JS
     "custom_css": "css/admin_premium.css",
     "custom_js": None,
-    
-    # Use modals instead of popups
     "use_google_fonts_cdn": True,
-    
-    # Show the UI customizer on the sidebar
     "show_ui_builder": False,
-
-    # Change form format
     "changeform_format": "horizontal_tabs",
     "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
-    
-    # List per page options
     "list_filter_horizontal": True,
-    
-    # Add language chooser to top menu
     "language_chooser": False,
 }
-
-# Ajustes finos de UI do Jazzmin - Tema moderno e elegante
 JAZZMIN_UI_TWEAKS = {
     "navbar": "navbar-dark navbar-primary",
     "sidebar": "sidebar-dark-primary",
@@ -224,27 +253,29 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar_nav_compact_style": False,
     "sidebar_disable_expand": False,
     "sidebar_nav_child_indent": True,
-    "theme": "lux",  # Tema Bootstrap elegante
+    "theme": "lux",
     "dark_mode_theme": None,
     "button_classes": {
         "primary": "btn-primary",
-        "secondary": "btn-secondary", 
+        "secondary": "btn-secondary",
         "info": "btn-info",
         "warning": "btn-warning",
         "danger": "btn-danger",
-        "success": "btn-success"
+        "success": "btn-success",
     },
-    "actions_sticky_top": False
+    "actions_sticky_top": False,
 }
 
-# Emails aparecem no terminal (modo dev)
+# ===========================
+# Email
+# ===========================
+# Em dev:
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
-# FUTURO POR PELO GMAIL
+# Futuro (Gmail):
 # EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 # EMAIL_HOST = "smtp.gmail.com"
 # EMAIL_PORT = 587
 # EMAIL_USE_TLS = True
 # EMAIL_HOST_USER = "seuemail@gmail.com"
-# EMAIL_HOST_PASSWORD = "sua_senha_de_app"  # senha de app, não a senha normal
+# EMAIL_HOST_PASSWORD = "sua_senha_de_app"
 # DEFAULT_FROM_EMAIL = "CondoX <seuemail@gmail.com>"
