@@ -1,0 +1,4 @@
+# Templates e estáticos do Django não definem a linguagem do projeto.
+templates/** linguist-documentation
+static/** linguist-vendored
+n8n_data/** linguist-vendored
