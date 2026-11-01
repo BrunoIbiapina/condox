@@ -1,5 +1,7 @@
 # 🏢 CondoX
 
+![CondoX: área do morador](docs/preview-portfolio.png)
+
 Sistema de gestão para condomínios feito em **Django + Jazzmin**, com portal para moradores, área administrativa e integrações futuras com n8n.
 
 ## 🚀 Funcionalidades
