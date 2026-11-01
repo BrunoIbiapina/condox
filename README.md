@@ -2,6 +2,8 @@
 
 ![CondoX: área do morador](docs/preview-portfolio.png)
 
+> **In English:** Condominium management system in Django: resident portal (bookings, notices, events and assemblies), manager area with financial dashboard and overdue payments, doorkeeper area with daily schedule and access control. Dockerized, with n8n automations.
+
 Sistema de gestão para condomínios feito em **Django + Jazzmin**, com portal para moradores, área administrativa e integrações futuras com n8n.
 
 ## 🚀 Funcionalidades
