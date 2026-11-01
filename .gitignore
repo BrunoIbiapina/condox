@@ -34,3 +34,5 @@ htmlcov/
 # Node (se aparecer)
 node_modules/
 EOF
+# Banco local do n8n (usuários e execuções) não vai para o repositório
+n8n_data/
